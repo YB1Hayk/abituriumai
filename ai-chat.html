@@ -15,6 +15,8 @@
 
   <!-- Markdown renderer -->
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <!-- XSS sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
@@ -33,11 +35,39 @@
       <a href="code.html" class="btn-nav">Начать</a>
     </nav>
 
-    <button class="nav-hamburger" aria-label="Меню">
-      <span class="material-symbols-outlined">menu</span>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Меню" aria-expanded="false">
+      <span class="material-symbols-outlined" id="hamburger-icon">menu</span>
     </button>
   </div>
 </header>
+
+<!-- ── Mobile drawer ────────────────────────────────────────── -->
+<div id="mobile-overlay" class="mobile-overlay" aria-hidden="true"></div>
+<nav id="mobile-drawer" class="mobile-drawer" aria-label="Мобильная навигация">
+  <div class="mobile-drawer-header">
+    <span class="nav-logo">АбитуриУм</span>
+    <button id="drawer-close" aria-label="Закрыть меню">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+  <div class="mobile-drawer-links">
+    <a href="code.html">
+      <span class="material-symbols-outlined">calculate</span>
+      Баллы
+    </a>
+    <a href="index.html" class="active">
+      <span class="material-symbols-outlined">smart_toy</span>
+      Ассистент
+    </a>
+    <a href="news.html">
+      <span class="material-symbols-outlined">newspaper</span>
+      Новости
+    </a>
+  </div>
+  <div class="mobile-drawer-footer">
+    <a href="code.html" class="btn-nav" style="display:block;text-align:center;padding:.75rem;">Начать</a>
+  </div>
+</nav>
 
 <!-- ── Main ────────────────────────────────────────────────── -->
 <main class="main-container">

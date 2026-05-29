@@ -1,6 +1,6 @@
 /* ── АбитуриУм · AI Chat Logic ──────────────────────────────── */
 
-const GROQ_API_KEY   = "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";
+const GROQ_API_KEY   = "GROQ_KEY_HERE";
 const TAVILY_API_KEY = "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";
 
 const SYSTEM_PROMPT = `Ты — «АбитуриУм», профессиональный наставник по поступлению в российские вузы в 2026 году.
@@ -23,6 +23,39 @@ const chatInput    = document.getElementById('chat-input');
 const sendBtn      = document.getElementById('send-btn');
 const guideBox     = document.getElementById('guide-box');
 const guideToggle  = document.getElementById('guide-toggle');
+
+/* ── Mobile drawer ────────────────────────────────────────── */
+const hamburger    = document.getElementById('nav-hamburger');
+const drawer       = document.getElementById('mobile-drawer');
+const overlay      = document.getElementById('mobile-overlay');
+const drawerClose  = document.getElementById('drawer-close');
+const hamburgerIcon = document.getElementById('hamburger-icon');
+
+function openDrawer() {
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    hamburgerIcon.textContent = 'close';
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    hamburgerIcon.textContent = 'menu';
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+}
+
+hamburger.addEventListener('click', () => {
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+});
+drawerClose.addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDrawer();
+});
 
 /* ── Guide toggle ─────────────────────────────────────────── */
 guideToggle.addEventListener('click', () => {
@@ -97,6 +130,16 @@ async function sendMessageToAI(userMessage) {
         })
     });
 
+    if (groqRes.status === 429) {
+        const retryAfter = groqRes.headers.get('retry-after') || '30';
+        const secs = parseInt(retryAfter, 10) || 30;
+        throw Object.assign(new Error('rate_limit'), { retryAfter: secs });
+    }
+
+    if (!groqRes.ok) {
+        throw new Error(`Сервер вернул ошибку ${groqRes.status}. Попробуй позже.`);
+    }
+
     const data = await groqRes.json();
 
     if (data.error) throw new Error(data.error.message);
@@ -119,11 +162,16 @@ async function handleSend() {
     try {
         const reply = await sendMessageToAI(text);
         removeLoading();
-        const rendered = marked.parse(reply);
-        appendMessage(rendered, 'ai');
+        const rawHtml  = marked.parse(reply);
+        const safeHtml = DOMPurify.sanitize(rawHtml);
+        appendMessage(safeHtml, 'ai');
     } catch (err) {
         removeLoading();
-        appendMessage(`<strong>Ошибка:</strong> ${escapeHtml(err.message || 'Не удалось получить ответ. Проверьте API-ключ.')}`, 'ai');
+        if (err.message === 'rate_limit') {
+            startRateLimitCountdown(err.retryAfter || 30);
+        } else {
+            appendMessage(`<strong>Ошибка:</strong> ${escapeHtml(err.message || 'Не удалось получить ответ.')}`, 'ai');
+        }
     } finally {
         sendBtn.disabled = false;
         chatInput.focus();
@@ -145,3 +193,35 @@ chatInput.addEventListener('input', () => {
     chatInput.style.height = 'auto';
     chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
 });
+
+/* ── Rate limit countdown ─────────────────────────────────── */
+function startRateLimitCountdown(seconds) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'msg msg-ai';
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    sendBtn.disabled = true;
+    chatInput.disabled = true;
+
+    let remaining = seconds;
+
+    const update = () => {
+        msgDiv.innerHTML = `⏳ Слишком много запросов. ИИ-наставник отдыхает... Повтор через <strong>${remaining}</strong> сек.`;
+    };
+
+    update();
+
+    const timer = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+            clearInterval(timer);
+            msgDiv.innerHTML = '✅ Готов! Можешь задавать следующий вопрос.';
+            sendBtn.disabled = false;
+            chatInput.disabled = false;
+            chatInput.focus();
+        } else {
+            update();
+        }
+    }, 1000);
+}
