@@ -1,6 +1,6 @@
 /* ── АбитуриУм · AI Chat Logic ──────────────────────────────── */
 
-const OPENAI_API_KEY = "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 реальный ключ хранится на GitHub
+// Ключ хранится в переменных окружения Vercel — не в коде
 const TAVILY_API_KEY = "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";
 
 /* ── Conversation history ─────────────────────────────────── */
@@ -136,44 +136,35 @@ async function sendMessageToAI(userMessage) {
         conversationHistory.splice(0, 2);
     }
 
-    const groqRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    const apiRes = await fetch("/api/chat", {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-                { role: "system", content: systemContent },
-                ...conversationHistory
-            ],
-            temperature: 0.7,
-            max_tokens: 1500
+            systemPrompt: systemContent,
+            messages: conversationHistory
         })
     });
 
-    if (groqRes.status === 429) {
-        // Remove the user message we just added since request failed
+    if (apiRes.status === 429) {
         conversationHistory.pop();
-        const retryAfter = groqRes.headers.get('retry-after') || '30';
-        const secs = parseInt(retryAfter, 10) || 30;
-        throw Object.assign(new Error('rate_limit'), { retryAfter: secs });
+        const errData = await apiRes.json().catch(() => ({}));
+        throw Object.assign(new Error('rate_limit'), { retryAfter: errData.retryAfter || 30 });
     }
 
-    if (!groqRes.ok) {
+    if (!apiRes.ok) {
         conversationHistory.pop();
-        throw new Error(`Сервер вернул ошибку ${groqRes.status}. Попробуй позже.`);
+        const errData = await apiRes.json().catch(() => ({}));
+        throw new Error(errData.error || `Сервер вернул ошибку ${apiRes.status}. Попробуй позже.`);
     }
 
-    const data = await groqRes.json();
+    const data = await apiRes.json();
 
     if (data.error) {
         conversationHistory.pop();
-        throw new Error(data.error.message);
+        throw new Error(data.error);
     }
 
-    const reply = data.choices[0].message.content;
+    const reply = data.reply;
 
     // Save assistant reply to history
     conversationHistory.push({ role: "assistant", content: reply });
