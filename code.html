@@ -140,13 +140,50 @@
                 АбитуриУм
             </a>
 <nav class="hidden md:flex items-center gap-8">
-<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="code.html">Баллы</a>
+<a class="font-label-caps text-label-caps text-primary font-bold border-b-2 border-primary" href="code.html">Калькулятор</a>
 <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="ai-chat.html">Ассистент</a>
 <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="news.html">Новости</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="profile.html">Кабинет</a>
 </nav>
-<a href="code.html#subjectsGrid" class="bg-primary-container text-white px-6 py-2 rounded-full font-label-caps text-label-caps hover:brightness-95 transition-all scale-95 active:scale-90">Начать</a>
+<div class="flex items-center gap-3">
+<a href="code.html#subjectsGrid" class="hidden md:inline-flex bg-primary-container text-white px-6 py-2 rounded-full font-label-caps text-label-caps hover:brightness-95 transition-all scale-95 active:scale-90">Начать</a>
+<button id="mob-hamburger" class="md:hidden p-2 rounded-lg text-on-surface" aria-label="Меню" aria-expanded="false">
+  <span class="material-symbols-outlined" id="mob-hamburger-icon">menu</span>
+</button>
+</div>
 </div>
 </header>
+<!-- Mobile Drawer -->
+<div id="mob-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="closeMobDrawer()"></div>
+<div id="mob-drawer" class="fixed top-0 right-0 h-full w-72 bg-surface z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+    <span class="font-headline-md text-headline-md font-bold text-on-surface">АбитуриУм</span>
+    <button onclick="closeMobDrawer()" class="p-1 text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="flex flex-col gap-1 p-4 flex-grow">
+    <a href="code.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container text-primary font-bold font-label-caps">
+      <span class="material-symbols-outlined">calculate</span>Калькулятор</a>
+    <a href="ai-chat.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container font-label-caps">
+      <span class="material-symbols-outlined">smart_toy</span>Ассистент</a>
+    <a href="news.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container font-label-caps">
+      <span class="material-symbols-outlined">newspaper</span>Новости</a>
+    <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container font-label-caps">
+      <span class="material-symbols-outlined">person</span>Кабинет</a>
+  </div>
+  <div class="p-4 border-t border-outline-variant">
+    <a href="code.html#subjectsGrid" class="block text-center bg-primary-container text-white px-6 py-3 rounded-full font-label-caps text-label-caps hover:brightness-95">Начать</a>
+  </div>
+</div>
+<script>
+  const mobHamburger = document.getElementById('mob-hamburger');
+  const mobDrawer = document.getElementById('mob-drawer');
+  const mobOverlay = document.getElementById('mob-overlay');
+  const mobIcon = document.getElementById('mob-hamburger-icon');
+  function openMobDrawer() { mobDrawer.classList.remove('translate-x-full'); mobOverlay.classList.remove('hidden'); mobIcon.textContent='close'; mobHamburger.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+  function closeMobDrawer() { mobDrawer.classList.add('translate-x-full'); mobOverlay.classList.add('hidden'); mobIcon.textContent='menu'; mobHamburger.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+  mobHamburger.addEventListener('click', () => mobDrawer.classList.contains('translate-x-full') ? openMobDrawer() : closeMobDrawer());
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeMobDrawer(); });
+</script>
 <main class="flex-grow max-w-7xl mx-auto px-container-padding py-12 w-full">
 <!-- Hero Section -->
 <div class="mb-section-gap max-w-2xl">
@@ -342,17 +379,43 @@
 
         // ─── Mock University Data ──────────────────────────────
         const mockUniversities = [
-            { name: "НИУ ВШЭ (ПМИ)", points: 295, chance: "68%", badge: "DVI Preparation", city: "Москва" },
-            { name: "МГУ им. Ломоносова", points: 290, chance: "74%", badge: "Math Major", city: "Москва" },
-            { name: "МФТИ (Физтех)", points: 300, chance: "52%", badge: "Olympiads", city: "Москва" },
-            { name: "СПбГУ (ПМ-ПУ)", points: 275, chance: "81%", badge: "Budget", city: "С.-Петербург" },
-            { name: "ИТМО", points: 270, chance: "85%", badge: "IT Focus", city: "С.-Петербург" },
-            { name: "МИФИ", points: 280, chance: "71%", badge: "Engineering", city: "Москва" },
-            { name: "Новосибирский ГУ", points: 260, chance: "88%", badge: "Research", city: "Новосибирск" },
-            { name: "УрФУ", points: 250, chance: "91%", badge: "Technical", city: "Екатеринбург" },
-            { name: "КФУ", points: 255, chance: "87%", badge: "Classical", city: "Казань" },
-            { name: "ДВФУ", points: 245, chance: "92%", badge: "Oriental", city: "Владивосток" },
-            { name: "БФУ им. Канта", points: 240, chance: "93%", badge: "European", city: "Калининград" },
+            // Москва
+            { name: "МГУ им. Ломоносова", points: 290, chance: "74%", badge: "Топ-1 РФ", city: "Москва" },
+            { name: "МФТИ (Физтех)", points: 300, chance: "52%", badge: "Олимпиады", city: "Москва" },
+            { name: "НИУ ВШЭ", points: 295, chance: "68%", badge: "Топ-экономика", city: "Москва" },
+            { name: "МИФИ", points: 280, chance: "71%", badge: "Инженерия", city: "Москва" },
+            { name: "МГТУ им. Баумана", points: 275, chance: "75%", badge: "Техническое", city: "Москва" },
+            { name: "РАНХиГС", points: 260, chance: "82%", badge: "Управление", city: "Москва" },
+            { name: "МГИМО", points: 285, chance: "65%", badge: "Международные", city: "Москва" },
+            { name: "РУДН", points: 250, chance: "86%", badge: "Многопрофильное", city: "Москва" },
+            { name: "МАИ", points: 245, chance: "88%", badge: "Авиация", city: "Москва" },
+            { name: "МИЭТ", points: 255, chance: "84%", badge: "Электроника", city: "Москва" },
+            // С.-Петербург
+            { name: "СПбГУ", points: 275, chance: "81%", badge: "Классический", city: "С.-Петербург" },
+            { name: "ИТМО", points: 270, chance: "85%", badge: "IT-фокус", city: "С.-Петербург" },
+            { name: "Политех Петра Великого", points: 260, chance: "87%", badge: "Инженерия", city: "С.-Петербург" },
+            { name: "СПбГЭУ", points: 245, chance: "89%", badge: "Экономика", city: "С.-Петербург" },
+            { name: "ГУАП", points: 240, chance: "91%", badge: "Авиаприборы", city: "С.-Петербург" },
+            // Новосибирск
+            { name: "НГУ", points: 260, chance: "88%", badge: "Академгородок", city: "Новосибирск" },
+            { name: "НГТУ", points: 245, chance: "91%", badge: "Технический", city: "Новосибирск" },
+            // Екатеринбург
+            { name: "УрФУ", points: 250, chance: "91%", badge: "Уральский", city: "Екатеринбург" },
+            { name: "УрГЮУ", points: 240, chance: "90%", badge: "Юридический", city: "Екатеринбург" },
+            // Казань
+            { name: "КФУ", points: 255, chance: "87%", badge: "Классический", city: "Казань" },
+            { name: "КНИТУ-КАИ", points: 240, chance: "91%", badge: "Авиация", city: "Казань" },
+            // Нижний Новгород
+            { name: "ННГУ им. Лобачевского", points: 245, chance: "90%", badge: "Классический", city: "Нижний Новгород" },
+            { name: "НГТУ им. Алексеева", points: 235, chance: "92%", badge: "Технический", city: "Нижний Новгород" },
+            // Другие города
+            { name: "ТГУ (Томск)", points: 255, chance: "87%", badge: "Исследования", city: "Томск" },
+            { name: "ТПУ (Томск)", points: 248, chance: "89%", badge: "Политехника", city: "Томск" },
+            { name: "ЮФУ (Ростов)", points: 242, chance: "91%", badge: "Южный", city: "Ростов-на-Дону" },
+            { name: "СФУ (Красноярск)", points: 238, chance: "92%", badge: "Сибирский", city: "Красноярск" },
+            { name: "ДВФУ", points: 245, chance: "92%", badge: "Востоковедение", city: "Владивосток" },
+            { name: "БФУ им. Канта", points: 240, chance: "93%", badge: "Европейский", city: "Калининград" },
+            { name: "ВГУ (Воронеж)", points: 235, chance: "93%", badge: "Классический", city: "Воронеж" },
         ];
 
         function getSelectedCities() {

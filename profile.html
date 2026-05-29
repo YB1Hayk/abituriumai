@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>АбитуриУм | Личный кабинет</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#f8f9ff",
+            "primary-container": "#ff5a00",
+            "on-primary": "#ffffff",
+            "on-surface": "#121c28",
+            "on-surface-variant": "#5b4137",
+            "on-secondary-container": "#5c6274",
+            "surface-container": "#e5eeff",
+            "surface-container-low": "#eef4ff",
+            "surface-container-high": "#dfe9fa",
+            "outline-variant": "#e4beb1",
+            "inverse-surface": "#27313e",
+            "primary": "#a83900",
+          },
+          fontFamily: {
+            "headline-lg": ["Hanken Grotesk"],
+            "headline-md": ["Hanken Grotesk"],
+            "label-caps": ["JetBrains Mono"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+          },
+          fontSize: {
+            "headline-lg": ["48px", {"lineHeight":"1.2","fontWeight":"700"}],
+            "headline-md": ["32px", {"lineHeight":"1.3","fontWeight":"600"}],
+            "label-caps": ["12px", {"lineHeight":"1.0","letterSpacing":"0.1em","fontWeight":"600"}],
+            "body-md": ["16px", {"lineHeight":"1.6","fontWeight":"400"}],
+          },
+          spacing: {
+            "container-padding": "32px",
+            "section-gap": "80px",
+            "bento-gap": "24px",
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    body { background: linear-gradient(150deg,#fff8f3 0%,#fff3eb 25%,#f8f9ff 65%,#fafbff 100%); background-attachment: fixed; }
+    .card { background:#fff; border-radius:1.5rem; border:1px solid #e4beb1; box-shadow:0 4px 20px rgba(17,24,39,.06); transition:transform .2s,box-shadow .2s; }
+    .card:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(17,24,39,.09); }
+    .progress-bar { height:10px; border-radius:999px; background:#e5eeff; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,#ff5a00,#ff8c42); transition:width .8s cubic-bezier(.4,0,.2,1); }
+    .subject-pill { display:inline-flex; align-items:center; gap:.35rem; padding:.3rem .75rem; border-radius:999px; font-size:.75rem; font-family:'JetBrains Mono',monospace; font-weight:600; letter-spacing:.05em; background:rgba(255,90,0,.08); color:#a83900; border:1px solid rgba(255,90,0,.2); }
+    .subject-pill .remove { cursor:pointer; opacity:.5; font-size:.9rem; }
+    .subject-pill .remove:hover { opacity:1; }
+    .uni-card { background:#fff; border-radius:1.25rem; border:1px solid #e4beb1; padding:1rem 1.25rem; display:flex; align-items:center; gap:1rem; transition:all .2s; cursor:pointer; }
+    .uni-card:hover { border-color:#ff5a00; background:rgba(255,90,0,.02); transform:translateX(4px); }
+    .countdown-ring { width:80px; height:80px; border-radius:50%; background:conic-gradient(#ff5a00 var(--prog,0deg), #e5eeff 0deg); display:flex; align-items:center; justify-content:center; position:relative; }
+    .countdown-ring::after { content:''; position:absolute; width:60px; height:60px; border-radius:50%; background:#fff; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation:fadeIn .4s ease both; }
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    input[type=checkbox] { accent-color:#ff5a00; }
+  </style>
+</head>
+<body class="text-on-surface font-body-md min-h-screen flex flex-col">
+
+<!-- Header -->
+<header class="bg-white/80 backdrop-blur-md border-b border-outline-variant sticky top-0 z-40">
+  <div class="flex justify-between items-center w-full px-container-padding py-4 max-w-7xl mx-auto">
+    <a href="index.html" class="font-headline-md text-xl font-bold text-on-surface tracking-tight">АбитуриУм</a>
+    <nav class="hidden md:flex items-center gap-8">
+      <a href="code.html" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium">Калькулятор</a>
+      <a href="ai-chat.html" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium">Ассистент</a>
+      <a href="news.html" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium">Новости</a>
+      <a href="profile.html" class="text-primary font-bold border-b-2 border-primary-container text-sm">Кабинет</a>
+    </nav>
+    <button id="mob-hamburger" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-surface-container transition-colors">
+      <span class="material-symbols-outlined" id="mob-icon">menu</span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Drawer -->
+<div id="mob-overlay" class="fixed inset-0 bg-black/45 z-50 hidden"></div>
+<nav id="mob-drawer" class="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 flex flex-col transform translate-x-full transition-transform duration-300 shadow-2xl">
+  <div class="flex items-center justify-between p-5 border-b border-outline-variant">
+    <span class="font-bold text-lg">АбитуриУм</span>
+    <button id="mob-close"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="flex flex-col p-4 gap-1">
+    <a href="index.html" class="flex items-center gap-3 p-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-xl">home</span>Главная</a>
+    <a href="code.html" class="flex items-center gap-3 p-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-xl">calculate</span>Калькулятор</a>
+    <a href="ai-chat.html" class="flex items-center gap-3 p-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-xl">smart_toy</span>Ассистент</a>
+    <a href="news.html" class="flex items-center gap-3 p-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-xl">newspaper</span>Новости</a>
+    <a href="profile.html" class="flex items-center gap-3 p-3 rounded-xl bg-orange-50 text-primary font-semibold"><span class="material-symbols-outlined text-xl">person</span>Личный кабинет</a>
+  </div>
+  <div class="mt-auto p-4"><a href="code.html" class="block text-center bg-primary-container text-white px-6 py-3 rounded-full font-semibold text-sm hover:brightness-110 transition-all">Начать</a></div>
+</nav>
+
+<main class="flex-grow max-w-7xl mx-auto px-4 md:px-container-padding py-8 w-full">
+
+  <!-- Page Header -->
+  <div class="mb-8 fade-in">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="w-2 h-2 bg-primary-container rounded-full" style="animation:pulse 2s infinite"></span>
+      <span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">ЛИЧНЫЙ КАБИНЕТ</span>
+    </div>
+    <h1 class="font-headline-md text-2xl md:text-4xl font-bold text-on-surface">Привет, <span id="greeting-name">Абитуриент</span> 👋</h1>
+    <p class="text-on-surface-variant mt-1 text-sm">Твой персональный трекер поступления</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+    <!-- Profile Card (col 4) -->
+    <div class="md:col-span-4 card p-6 fade-in" style="animation-delay:.05s">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg">
+          <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL' 1">person</span>
+        </div>
+        <button onclick="openSettings()" class="flex items-center gap-1.5 text-xs font-label-caps text-on-surface-variant border border-outline-variant px-3 py-1.5 rounded-full hover:border-primary-container hover:text-primary transition-all">
+          <span class="material-symbols-outlined text-sm">settings</span>Настройки
+        </button>
+      </div>
+      <h2 id="profile-name" class="font-bold text-xl text-on-surface mb-1">Загрузка...</h2>
+      <p id="profile-grade" class="text-xs text-on-surface-variant font-label-caps mb-4">11 КЛАСС · ЕГЭ 2026</p>
+      <div class="mb-4">
+        <p class="text-xs font-label-caps text-on-surface-variant mb-2">МОИ ПРЕДМЕТЫ</p>
+        <div id="subjects-display" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div class="pt-4 border-t border-outline-variant flex justify-between text-center">
+        <div>
+          <p id="stat-days" class="font-bold text-xl text-primary-container">—</p>
+          <p class="text-[10px] font-label-caps text-on-surface-variant">ДНЕЙ ДО ЕГЭ</p>
+        </div>
+        <div>
+          <p id="stat-score" class="font-bold text-xl text-primary-container">—</p>
+          <p class="text-[10px] font-label-caps text-on-surface-variant">ЦЕЛЬ БАЛЛОВ</p>
+        </div>
+        <div>
+          <p id="stat-unis" class="font-bold text-xl text-primary-container">—</p>
+          <p class="text-[10px] font-label-caps text-on-surface-variant">ВУЗОВ СОХРАНЕНО</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress + Countdown (col 8) -->
+    <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+      <!-- Progress Widget -->
+      <div class="card p-6 fade-in sm:col-span-2" style="animation-delay:.1s">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="text-xs font-label-caps text-on-surface-variant mb-1">ПРОГРЕСС К ЦЕЛИ</p>
+            <h3 class="font-bold text-lg text-on-surface">Набранные баллы</h3>
+          </div>
+          <button onclick="openSettings()" class="text-xs text-primary font-label-caps hover:underline">Изменить</button>
+        </div>
+        <div class="flex items-end gap-4 mb-3">
+          <span id="current-score-label" class="font-bold text-4xl text-primary-container">0</span>
+          <span class="text-on-surface-variant text-sm mb-1">/ <span id="target-score-label">300</span> баллов</span>
+        </div>
+        <div class="progress-bar mb-2">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="flex justify-between text-[10px] font-label-caps text-on-surface-variant">
+          <span>0</span>
+          <span id="progress-pct">0%</span>
+          <span id="progress-target">300</span>
+        </div>
+      </div>
+
+      <!-- Exam Countdown -->
+      <div class="card p-6 fade-in" style="animation-delay:.15s">
+        <p class="text-xs font-label-caps text-on-surface-variant mb-3">ОБРАТНЫЙ ОТСЧЁТ</p>
+        <p class="font-bold text-sm text-on-surface mb-4">До первого ЕГЭ</p>
+        <div class="flex items-center gap-4">
+          <div class="countdown-ring" id="countdown-ring" style="--prog:0deg">
+            <span class="relative z-10 font-bold text-lg text-primary-container" id="countdown-days">—</span>
+          </div>
+          <div>
+            <p class="font-bold text-2xl text-on-surface" id="countdown-big">—</p>
+            <p class="text-xs text-on-surface-variant">дней осталось</p>
+            <p class="text-[10px] font-label-caps text-primary mt-1" id="exam-date-label">ЕГЭ 2026</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card p-6 fade-in" style="animation-delay:.2s">
+        <p class="text-xs font-label-caps text-on-surface-variant mb-3">БЫСТРЫЕ ДЕЙСТВИЯ</p>
+        <div class="space-y-2">
+          <a href="ai-chat.html" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container transition-colors group">
+            <span class="material-symbols-outlined text-primary-container" style="font-variation-settings:'FILL' 1">smart_toy</span>
+            <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Спросить ИИ-наставника</span>
+          </a>
+          <a href="code.html" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container transition-colors group">
+            <span class="material-symbols-outlined text-primary-container" style="font-variation-settings:'FILL' 1">calculate</span>
+            <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Калькулятор шансов</span>
+          </a>
+          <a href="news.html" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container transition-colors group">
+            <span class="material-symbols-outlined text-primary-container" style="font-variation-settings:'FILL' 1">newspaper</span>
+            <span class="text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Актуальные новости</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Saved Universities (col 12) -->
+    <div class="md:col-span-12 card p-6 fade-in" style="animation-delay:.25s">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <p class="text-xs font-label-caps text-on-surface-variant mb-1">МОЙ СПИСОК</p>
+          <h3 class="font-bold text-lg text-on-surface">Сохранённые вузы</h3>
+        </div>
+        <button onclick="openAddUni()" class="flex items-center gap-1.5 bg-primary-container text-white px-4 py-2 rounded-full text-xs font-label-caps hover:brightness-110 transition-all">
+          <span class="material-symbols-outlined text-sm">add</span>Добавить
+        </button>
+      </div>
+      <div id="saved-unis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+      <p id="no-unis-msg" class="hidden text-center py-8 text-on-surface-variant text-sm">
+        <span class="material-symbols-outlined text-3xl block mb-2 mx-auto">school</span>
+        Ещё нет сохранённых вузов. Нажми «Добавить»!
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-inverse-surface border-t border-white/10 mt-auto">
+  <div class="flex flex-col md:flex-row justify-between items-center w-full px-container-padding py-8 max-w-7xl mx-auto gap-4">
+    <span class="font-bold text-white text-lg">АбитуриУм</span>
+    <p class="text-white/40 text-xs">© 2026 АбитуриУм. Твой точный путь в вуз.</p>
+  </div>
+</footer>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-bg hidden">
+  <div class="bg-white rounded-[24px] w-full max-w-lg max-h-[90vh] overflow-y-auto p-8 relative">
+    <button onclick="closeSettings()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-outline-variant transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant">close</span>
+    </button>
+    <h2 class="font-bold text-xl text-on-surface mb-6">Настройки профиля</h2>
+
+    <div class="space-y-5">
+      <div>
+        <label class="block text-xs font-label-caps text-on-surface-variant mb-2">ТВОЁ ИМЯ</label>
+        <input id="set-name" type="text" placeholder="Например: Алексей" class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none text-on-surface"/>
+      </div>
+      <div>
+        <label class="block text-xs font-label-caps text-on-surface-variant mb-2">КЛАСС</label>
+        <div class="flex gap-2">
+          <button onclick="setGradeBtn(this,9)" data-grade="9" class="grade-btn flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all border-outline-variant text-on-surface-variant hover:border-primary-container">9 класс (ОГЭ)</button>
+          <button onclick="setGradeBtn(this,11)" data-grade="11" class="grade-btn flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all border-outline-variant text-on-surface-variant hover:border-primary-container">11 класс (ЕГЭ)</button>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-label-caps text-on-surface-variant mb-2">ПРЕДМЕТЫ ЕГЭ / ОГЭ</label>
+        <div class="grid grid-cols-2 gap-2" id="subject-checkboxes"></div>
+      </div>
+      <div>
+        <label class="block text-xs font-label-caps text-on-surface-variant mb-2">МОЙ ТЕКУЩИЙ БАЛЛ (СУММА)</label>
+        <input id="set-current" type="number" min="0" max="400" placeholder="240" class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none"/>
+      </div>
+      <div>
+        <label class="block text-xs font-label-caps text-on-surface-variant mb-2">ЦЕЛЬ (СУММА БАЛЛОВ)</label>
+        <input id="set-target" type="number" min="0" max="400" placeholder="300" class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container focus:border-transparent outline-none"/>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-8">
+      <button onclick="closeSettings()" class="flex-1 py-3 rounded-xl border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container transition-all">Отмена</button>
+      <button onclick="saveSettings()" class="flex-1 py-3 rounded-xl bg-primary-container text-white text-sm font-semibold hover:brightness-110 transition-all">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add University Modal -->
+<div id="add-uni-modal" class="modal-bg hidden">
+  <div class="bg-white rounded-[24px] w-full max-w-md p-8 relative">
+    <button onclick="closeAddUni()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-surface-container flex items-center justify-center">
+      <span class="material-symbols-outlined text-on-surface-variant">close</span>
+    </button>
+    <h2 class="font-bold text-xl text-on-surface mb-6">Добавить вуз</h2>
+    <div class="space-y-4">
+      <input id="add-uni-name" type="text" placeholder="Название вуза" class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container outline-none"/>
+      <input id="add-uni-dir" type="text" placeholder="Направление (напр. Информатика)" class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container outline-none"/>
+      <input id="add-uni-score" type="number" placeholder="Проходной балл" class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container outline-none"/>
+      <select id="add-uni-city" class="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary-container outline-none bg-white">
+        <option value="">Выбери город</option>
+        <option>Москва</option><option>Санкт-Петербург</option><option>Новосибирск</option>
+        <option>Екатеринбург</option><option>Казань</option><option>Другой</option>
+      </select>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeAddUni()" class="flex-1 py-3 rounded-xl border border-outline-variant text-on-surface-variant text-sm font-semibold">Отмена</button>
+      <button onclick="saveUni()" class="flex-1 py-3 rounded-xl bg-primary-container text-white text-sm font-semibold hover:brightness-110 transition-all">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ──────────────────────────────────────────────
+const ALL_SUBJECTS = ['Русский язык','Математика (Профиль)','Математика (База)','Обществознание','Физика','Химия','Информатика','История','Биология','Литература','Иностранный язык','География'];
+const EGE_DATE = new Date('2026-05-25');
+const DEFAULT_UNIS = [
+  { name:'МГУ им. Ломоносова', dir:'Вычислительная математика', score:300, city:'Москва' },
+  { name:'НИУ ВШЭ', dir:'Программная инженерия', score:295, city:'Москва' },
+  { name:'ИТМО', dir:'Информационные технологии', score:280, city:'Санкт-Петербург' },
+  { name:'МФТИ (Физтех)', dir:'Прикладная математика', score:305, city:'Москва' },
+];
+
+// ── Load / Save Profile ────────────────────────────────────
+function loadProfile() {
+  const raw = localStorage.getItem('abituriumProfile');
+  if (raw) return JSON.parse(raw);
+  return {
+    name: 'Абитуриент',
+    grade: 11,
+    subjects: ['Русский язык','Математика (Профиль)','Информатика'],
+    currentScore: 240,
+    targetScore: 300,
+    savedUnis: DEFAULT_UNIS,
+  };
+}
+
+function saveProfile(profile) {
+  localStorage.setItem('abituriumProfile', JSON.stringify(profile));
+}
+
+let profile = loadProfile();
+
+// ── Render Page ────────────────────────────────────────────
+function renderAll() {
+  // Name
+  document.getElementById('greeting-name').textContent = profile.name;
+  document.getElementById('profile-name').textContent = profile.name;
+  document.getElementById('profile-grade').textContent = `${profile.grade} КЛАСС · ${profile.grade === 9 ? 'ОГЭ' : 'ЕГЭ'} 2026`;
+
+  // Stats
+  const daysLeft = Math.max(0, Math.ceil((EGE_DATE - Date.now()) / 86400000));
+  document.getElementById('stat-days').textContent = daysLeft;
+  document.getElementById('stat-score').textContent = profile.targetScore;
+  document.getElementById('stat-unis').textContent = profile.savedUnis.length;
+
+  // Subjects
+  const subDiv = document.getElementById('subjects-display');
+  subDiv.innerHTML = profile.subjects.map(s => `<span class="subject-pill">${s}</span>`).join('');
+
+  // Progress
+  const pct = Math.min(100, Math.round((profile.currentScore / profile.targetScore) * 100));
+  document.getElementById('current-score-label').textContent = profile.currentScore;
+  document.getElementById('target-score-label').textContent = profile.targetScore;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-target').textContent = profile.targetScore;
+
+  // Countdown
+  document.getElementById('countdown-days').textContent = daysLeft;
+  document.getElementById('countdown-big').textContent = daysLeft;
+  document.getElementById('exam-date-label').textContent = '25 МАЯ 2026';
+  const totalDays = Math.ceil((EGE_DATE - new Date('2025-09-01')) / 86400000);
+  const passed = totalDays - daysLeft;
+  const deg = Math.round((passed / totalDays) * 360);
+  document.getElementById('countdown-ring').style.setProperty('--prog', deg + 'deg');
+
+  // Universities
+  renderUnis();
+}
+
+function renderUnis() {
+  const container = document.getElementById('saved-unis');
+  const noMsg = document.getElementById('no-unis-msg');
+  if (!profile.savedUnis.length) {
+    container.innerHTML = '';
+    noMsg.classList.remove('hidden');
+    return;
+  }
+  noMsg.classList.add('hidden');
+  container.innerHTML = profile.savedUnis.map((u, i) => `
+    <div class="uni-card group">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-primary-container text-lg" style="font-variation-settings:'FILL' 1">school</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm text-on-surface truncate">${u.name}</p>
+        <p class="text-xs text-on-surface-variant truncate">${u.dir}</p>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="text-[10px] font-label-caps text-primary-container">${u.score} баллов</span>
+          <span class="text-[10px] text-on-surface-variant">· ${u.city}</span>
+        </div>
+      </div>
+      <button onclick="removeUni(${i})" class="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-red-50 hover:text-red-500 transition-all">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+    </div>`).join('');
+}
+
+// ── Settings Modal ─────────────────────────────────────────
+function openSettings() {
+  document.getElementById('set-name').value = profile.name;
+  document.getElementById('set-current').value = profile.currentScore;
+  document.getElementById('set-target').value = profile.targetScore;
+
+  // Grade buttons
+  document.querySelectorAll('.grade-btn').forEach(b => {
+    const active = parseInt(b.dataset.grade) === profile.grade;
+    b.classList.toggle('border-primary-container', active);
+    b.classList.toggle('text-primary', active);
+    b.classList.toggle('bg-orange-50', active);
+    b.classList.toggle('border-outline-variant', !active);
+    b.classList.toggle('text-on-surface-variant', !active);
+  });
+
+  // Subject checkboxes
+  const grid = document.getElementById('subject-checkboxes');
+  grid.innerHTML = ALL_SUBJECTS.map(s => `
+    <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-surface-container transition-colors">
+      <input type="checkbox" value="${s}" ${profile.subjects.includes(s) ? 'checked' : ''} class="w-4 h-4 rounded"/>
+      <span class="text-sm text-on-surface">${s}</span>
+    </label>`).join('');
+
+  document.getElementById('settings-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+let selectedGrade = profile.grade;
+function setGradeBtn(btn, grade) {
+  selectedGrade = grade;
+  document.querySelectorAll('.grade-btn').forEach(b => {
+    const active = parseInt(b.dataset.grade) === grade;
+    b.classList.toggle('border-primary-container', active);
+    b.classList.toggle('text-primary', active);
+    b.classList.toggle('bg-orange-50', active);
+    b.classList.toggle('border-outline-variant', !active);
+    b.classList.toggle('text-on-surface-variant', !active);
+  });
+}
+
+function saveSettings() {
+  const name = document.getElementById('set-name').value.trim() || 'Абитуриент';
+  const current = parseInt(document.getElementById('set-current').value) || 0;
+  const target = parseInt(document.getElementById('set-target').value) || 300;
+  const checked = [...document.querySelectorAll('#subject-checkboxes input:checked')].map(i => i.value);
+  profile = { ...profile, name, grade: selectedGrade, subjects: checked.length ? checked : profile.subjects, currentScore: current, targetScore: target };
+  saveProfile(profile);
+  closeSettings();
+  renderAll();
+}
+
+// ── Add University Modal ───────────────────────────────────
+function openAddUni() {
+  document.getElementById('add-uni-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeAddUni() {
+  document.getElementById('add-uni-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+  ['add-uni-name','add-uni-dir','add-uni-score','add-uni-city'].forEach(id => document.getElementById(id).value = '');
+}
+function saveUni() {
+  const name = document.getElementById('add-uni-name').value.trim();
+  if (!name) return;
+  const uni = {
+    name,
+    dir: document.getElementById('add-uni-dir').value.trim() || 'Направление не указано',
+    score: parseInt(document.getElementById('add-uni-score').value) || 0,
+    city: document.getElementById('add-uni-city').value || 'Не указан',
+  };
+  profile.savedUnis.push(uni);
+  saveProfile(profile);
+  closeAddUni();
+  renderAll();
+}
+function removeUni(i) {
+  profile.savedUnis.splice(i, 1);
+  saveProfile(profile);
+  renderUnis();
+  document.getElementById('stat-unis').textContent = profile.savedUnis.length;
+}
+
+// ── Mobile Drawer ──────────────────────────────────────────
+const mobHamburger = document.getElementById('mob-hamburger');
+const mobDrawer = document.getElementById('mob-drawer');
+const mobOverlay = document.getElementById('mob-overlay');
+const mobIcon = document.getElementById('mob-icon');
+
+function openMob() {
+  mobDrawer.classList.remove('translate-x-full');
+  mobOverlay.classList.remove('hidden');
+  mobIcon.textContent = 'close';
+  document.body.style.overflow = 'hidden';
+}
+function closeMob() {
+  mobDrawer.classList.add('translate-x-full');
+  mobOverlay.classList.add('hidden');
+  mobIcon.textContent = 'menu';
+  document.body.style.overflow = '';
+}
+mobHamburger.addEventListener('click', () => mobDrawer.classList.contains('translate-x-full') ? openMob() : closeMob());
+document.getElementById('mob-close').addEventListener('click', closeMob);
+mobOverlay.addEventListener('click', closeMob);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMob(); closeSettings(); closeAddUni(); } });
+
+// ── Init ───────────────────────────────────────────────────
+selectedGrade = profile.grade;
+renderAll();
+</script>
+</body>
+</html>

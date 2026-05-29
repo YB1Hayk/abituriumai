@@ -126,7 +126,18 @@ async function sendMessageToAI(userMessage) {
         }
     } catch (_) { /* Поиск не критичен — продолжаем без него */ }
 
-    const systemContent = SYSTEM_PROMPT + (context ? `\n\n---\nАКТУАЛЬНЫЙ КОНТЕКСТ ИЗ ИНТЕРНЕТА:\n${context}` : "");
+    // Personalization from profile
+    let profileNote = "";
+    try {
+        const saved = localStorage.getItem('abituriumProfile');
+        if (saved) {
+            const p = JSON.parse(saved);
+            const subjects = (p.subjects || []).join(', ') || 'не указаны';
+            profileNote = `\n\n---\nПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ:\nИмя: ${p.name || 'Абитуриент'}, класс: ${p.grade || 11}\nПредметы ЕГЭ: ${subjects}\nТекущий балл: ${p.currentScore || '—'}, целевой балл: ${p.targetScore || '—'}`;
+        }
+    } catch (_) {}
+
+    const systemContent = SYSTEM_PROMPT + profileNote + (context ? `\n\n---\nАКТУАЛЬНЫЙ КОНТЕКСТ ИЗ ИНТЕРНЕТА:\n${context}` : "");
 
     // Add user message to history
     conversationHistory.push({ role: "user", content: userMessage });

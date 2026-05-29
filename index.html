@@ -127,13 +127,52 @@
 <div class="flex justify-between items-center w-full px-container-padding py-4 max-w-7xl mx-auto">
 <a href="index.html" class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">АбитуриУм</a>
 <div class="hidden md:flex items-center gap-8">
-<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="code.html">Баллы</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="code.html">Калькулятор</a>
 <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="ai-chat.html">Ассистент</a>
 <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="news.html">Новости</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="profile.html">Кабинет</a>
 </div>
-<a href="code.html" class="bg-primary-container text-on-primary px-6 py-2 rounded-full font-label-caps text-label-caps hover:bg-primary transition-all duration-200 active:scale-95">Начать</a>
+<div class="flex items-center gap-3">
+<a href="code.html" class="hidden md:inline-flex bg-primary-container text-on-primary px-6 py-2 rounded-full font-label-caps text-label-caps hover:bg-primary transition-all duration-200 active:scale-95">Начать</a>
+<button id="mob-hamburger" class="md:hidden p-2 rounded-lg text-on-surface" aria-label="Меню" aria-expanded="false">
+  <span class="material-symbols-outlined" id="mob-hamburger-icon">menu</span>
+</button>
+</div>
 </div>
 </nav>
+
+<!-- Mobile Drawer -->
+<div id="mob-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="closeMobDrawer()"></div>
+<div id="mob-drawer" class="fixed top-0 right-0 h-full w-72 bg-surface z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+    <span class="font-headline-md text-headline-md font-bold text-on-surface">АбитуриУм</span>
+    <button onclick="closeMobDrawer()" class="p-1 text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="flex flex-col gap-1 p-4 flex-grow">
+    <a href="code.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container font-body-md">
+      <span class="material-symbols-outlined">calculate</span>Калькулятор</a>
+    <a href="ai-chat.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container font-body-md">
+      <span class="material-symbols-outlined">smart_toy</span>Ассистент</a>
+    <a href="news.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container font-body-md">
+      <span class="material-symbols-outlined">newspaper</span>Новости</a>
+    <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container font-body-md">
+      <span class="material-symbols-outlined">person</span>Кабинет</a>
+  </div>
+  <div class="p-4 border-t border-outline-variant">
+    <a href="code.html" class="block text-center bg-primary-container text-white px-6 py-3 rounded-full font-label-caps text-label-caps hover:brightness-95">Начать</a>
+  </div>
+</div>
+<script>
+  const mobHamburger = document.getElementById('mob-hamburger');
+  const mobDrawer = document.getElementById('mob-drawer');
+  const mobOverlay = document.getElementById('mob-overlay');
+  const mobIcon = document.getElementById('mob-hamburger-icon');
+  function openMobDrawer() { mobDrawer.classList.remove('translate-x-full'); mobOverlay.classList.remove('hidden'); mobIcon.textContent='close'; mobHamburger.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+  function closeMobDrawer() { mobDrawer.classList.add('translate-x-full'); mobOverlay.classList.add('hidden'); mobIcon.textContent='menu'; mobHamburger.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+  mobHamburger.addEventListener('click', () => mobDrawer.classList.contains('translate-x-full') ? openMobDrawer() : closeMobDrawer());
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeMobDrawer(); });
+</script>
+
 <main class="pt-24">
 <!-- Hero Section -->
 <section class="max-w-7xl mx-auto px-container-padding py-section-gap flex flex-col items-center text-center">
