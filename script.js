@@ -1,6 +1,6 @@
 /* ── АбитуриУм · AI Chat Logic ──────────────────────────────── */
 
-const GROQ_API_KEY   = "GROQ_KEY_HERE";
+const GROQ_API_KEY   = "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";
 const TAVILY_API_KEY = "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";
 
 const SYSTEM_PROMPT = `Ты — «АбитуриУм», профессиональный наставник по поступлению в российские вузы в 2026 году.
