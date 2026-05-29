@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>АбитуриУм | Планировщик</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface":                "#f8f9ff",
+            "surface-container":      "#e5eeff",
+            "surface-container-low":  "#eef4ff",
+            "surface-container-high": "#dfe9fa",
+            "on-surface":             "#121c28",
+            "on-surface-variant":     "#5b4137",
+            "on-secondary-container": "#5c6274",
+            "outline-variant":        "#e4beb1",
+            "primary":                "#a83900",
+            "primary-container":      "#ff5a00",
+            "on-primary":             "#ffffff",
+            "inverse-surface":        "#27313e",
+            "error":                  "#ba1a1a",
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            display: ["Hanken Grotesk", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    /* Tab content */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    /* Chat bubbles */
+    .msg-user { background: #ff5a00; color:#fff; margin-left:auto; border-radius:18px 18px 4px 18px; }
+    .msg-ai   { background: #fff; color:#121c28; margin-right:auto; border-radius:18px 18px 18px 4px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .msg-base { padding:.75rem 1rem; max-width:85%; font-size:.9375rem; line-height:1.6; }
+    /* Markdown inside AI bubble */
+    .msg-ai h3 { font-size:1rem; font-weight:700; margin:.6em 0 .3em; }
+    .msg-ai ul,
+    .msg-ai ol  { padding-left:1.25em; margin:.4em 0; }
+    .msg-ai li  { margin:.2em 0; }
+    .msg-ai strong { font-weight:700; }
+    .msg-ai em     { font-style:italic; }
+    .msg-ai table  { border-collapse:collapse; width:100%; margin:.5em 0; font-size:.85rem; }
+    .msg-ai th,
+    .msg-ai td  { border:1px solid #e4beb1; padding:.3em .6em; text-align:left; }
+    .msg-ai th  { background:#fff3eb; }
+    .msg-ai code { background:#f3f4f6; border-radius:4px; padding:0 .3em; font-family:'JetBrains Mono',monospace; font-size:.82em; }
+    /* Dots loading */
+    @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+    .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#a83900; margin:0 2px; animation:blink 1.4s infinite both; }
+    .dot:nth-child(2){animation-delay:.2s}
+    .dot:nth-child(3){animation-delay:.4s}
+    /* Fox mascot */
+    .fox-wrap { position:absolute; bottom:80px; right:16px; pointer-events:none; }
+    /* Gradient body bg */
+    body { background: linear-gradient(150deg,#fff8f3 0%,#fff3eb 25%,#f8f9ff 65%,#fafbff 100%); background-attachment:fixed; min-height:100vh; }
+    /* Calendar table */
+    .cal-row-high td:first-child { border-left:3px solid #ff5a00; }
+    .cal-row-mid  td:first-child { border-left:3px solid #f59e0b; }
+    .cal-row-low  td:first-child { border-left:3px solid #6ee7b7; }
+    /* Tab indicator */
+    .tab-btn.active-tab { background:#fff3eb; color:#a83900; border-bottom:2px solid #ff5a00; }
+    /* Scrollbar */
+    #chat-messages::-webkit-scrollbar { width:5px; }
+    #chat-messages::-webkit-scrollbar-thumb { background:#e4beb1; border-radius:4px; }
+  </style>
+</head>
+<body class="text-on-surface font-sans">
+
+<!-- ── Top Nav ──────────────────────────────────────────────── -->
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-outline-variant shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 sm:px-8 py-3 flex justify-between items-center">
+    <a href="index.html" class="font-display font-bold text-xl text-on-surface tracking-tight">АбитуриУм</a>
+    <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+      <a href="code.html"      class="text-on-surface-variant hover:text-primary transition-colors">Калькулятор</a>
+      <a href="ai-chat.html"   class="text-on-surface-variant hover:text-primary transition-colors">Ассистент</a>
+      <a href="news.html"      class="text-on-surface-variant hover:text-primary transition-colors">Новости</a>
+      <a href="profile.html"   class="text-on-surface-variant hover:text-primary transition-colors">Кабинет</a>
+      <a href="planner.html"   class="text-primary border-b-2 border-primary pb-0.5">Планировщик</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <a href="code.html" class="hidden md:inline-flex bg-primary-container text-white px-5 py-2 rounded-full text-xs font-bold hover:brightness-95 transition-all">Начать</a>
+      <button id="mob-hamburger" class="md:hidden p-2 rounded-lg text-on-surface" aria-label="Меню">
+        <span class="material-symbols-outlined" id="mob-icon">menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Mobile Drawer ─────────────────────────────────────────── -->
+<div id="mob-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="closeMob()"></div>
+<div id="mob-drawer" class="fixed top-0 right-0 h-full w-72 bg-surface z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+  <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+    <span class="font-display font-bold text-xl">АбитуриУм</span>
+    <button onclick="closeMob()" class="p-1 text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="flex flex-col gap-1 p-4 flex-grow">
+    <a href="code.html"    class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-sm font-semibold"><span class="material-symbols-outlined">calculate</span>Калькулятор</a>
+    <a href="ai-chat.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-sm font-semibold"><span class="material-symbols-outlined">smart_toy</span>Ассистент</a>
+    <a href="news.html"    class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-sm font-semibold"><span class="material-symbols-outlined">newspaper</span>Новости</a>
+    <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-sm font-semibold"><span class="material-symbols-outlined">person</span>Кабинет</a>
+    <a href="planner.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container text-primary font-bold text-sm"><span class="material-symbols-outlined">map</span>Планировщик</a>
+  </div>
+  <div class="p-4 border-t border-outline-variant">
+    <a href="code.html" class="block text-center bg-primary-container text-white px-6 py-3 rounded-full text-xs font-bold hover:brightness-95">Начать</a>
+  </div>
+</div>
+
+<!-- ── Page Hero ─────────────────────────────────────────────── -->
+<div class="max-w-6xl mx-auto px-4 sm:px-8 pt-8 pb-4">
+  <span class="text-xs font-mono font-semibold text-primary tracking-widest uppercase">Умный планировщик</span>
+  <h1 class="font-display font-bold text-3xl sm:text-4xl mt-1 mb-1">Мой путь в вуз</h1>
+  <p class="text-on-surface-variant text-sm">Заполни анкету → получи персональную дорожную карту → следи за дедлайнами → спроси ИИ</p>
+</div>
+
+<!-- ── Tab Bar ───────────────────────────────────────────────── -->
+<div class="max-w-6xl mx-auto px-4 sm:px-8">
+  <div class="flex overflow-x-auto gap-1 border-b border-outline-variant">
+    <button class="tab-btn active-tab flex items-center gap-2 px-4 sm:px-5 py-3 text-sm font-semibold whitespace-nowrap transition-all rounded-t-lg" onclick="switchTab('profile-tab',this)">
+      <span class="material-symbols-outlined text-base">person_edit</span>Профиль
+    </button>
+    <button class="tab-btn flex items-center gap-2 px-4 sm:px-5 py-3 text-sm font-semibold whitespace-nowrap text-on-surface-variant hover:text-primary transition-all rounded-t-lg" onclick="switchTab('roadmap-tab',this)">
+      <span class="material-symbols-outlined text-base">route</span>Моё поступление
+    </button>
+    <button class="tab-btn flex items-center gap-2 px-4 sm:px-5 py-3 text-sm font-semibold whitespace-nowrap text-on-surface-variant hover:text-primary transition-all rounded-t-lg" onclick="switchTab('calendar-tab',this)">
+      <span class="material-symbols-outlined text-base">calendar_month</span>Календарь
+    </button>
+    <button class="tab-btn flex items-center gap-2 px-4 sm:px-5 py-3 text-sm font-semibold whitespace-nowrap text-on-surface-variant hover:text-primary transition-all rounded-t-lg" onclick="switchTab('chat-tab',this)">
+      <span class="material-symbols-outlined text-base">smart_toy</span>ИИ-наставник
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TAB 1 — ПРОФИЛЬ
+══════════════════════════════════════════════════════════════ -->
+<div id="profile-tab" class="tab-panel active max-w-6xl mx-auto px-4 sm:px-8 py-8">
+  <div class="grid md:grid-cols-2 gap-6">
+
+    <!-- Form card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-outline-variant p-6 sm:p-8">
+      <h2 class="font-display font-bold text-xl mb-1">Анкета абитуриента</h2>
+      <p class="text-on-surface-variant text-sm mb-6">Данные используются ИИ для персонализации ответов</p>
+
+      <div class="flex flex-col gap-4">
+        <!-- Имя -->
+        <div>
+          <label class="block text-xs font-semibold font-mono tracking-widest text-on-surface-variant uppercase mb-1.5">Имя</label>
+          <input id="p-name" type="text" placeholder="Например: Алексей" maxlength="60"
+            class="w-full border border-outline-variant rounded-xl px-4 py-3 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+
+        <!-- Желаемый город -->
+        <div>
+          <label class="block text-xs font-semibold font-mono tracking-widest text-on-surface-variant uppercase mb-1.5">Желаемый город</label>
+          <input id="p-city" type="text" placeholder="Москва, С.-Петербург, Любой..." maxlength="80"
+            class="w-full border border-outline-variant rounded-xl px-4 py-3 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+
+        <!-- Планируемые баллы -->
+        <div>
+          <label class="block text-xs font-semibold font-mono tracking-widest text-on-surface-variant uppercase mb-1.5">Планируемые баллы ЕГЭ</label>
+          <input id="p-score" type="number" placeholder="Например: 260" min="0" max="400"
+            class="w-full border border-outline-variant rounded-xl px-4 py-3 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+
+        <!-- Специальность -->
+        <div>
+          <label class="block text-xs font-semibold font-mono tracking-widest text-on-surface-variant uppercase mb-1.5">Направление / специальность</label>
+          <input id="p-specialty" type="text" placeholder="IT, Медицина, Юриспруденция..." maxlength="100"
+            class="w-full border border-outline-variant rounded-xl px-4 py-3 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        </div>
+
+        <!-- Бюджет / Платно -->
+        <div>
+          <label class="block text-xs font-semibold font-mono tracking-widest text-on-surface-variant uppercase mb-2">Форма обучения</label>
+          <div class="flex gap-2">
+            <button id="btn-budget" onclick="setToggle('budget','Бюджет')" class="toggle-btn flex-1 py-2.5 rounded-xl border border-outline-variant text-sm font-semibold bg-surface hover:bg-surface-container transition-all">🎓 Бюджет</button>
+            <button id="btn-paid"   onclick="setToggle('budget','Платно')"  class="toggle-btn flex-1 py-2.5 rounded-xl border border-outline-variant text-sm font-semibold bg-surface hover:bg-surface-container transition-all">💳 Платно</button>
+            <button id="btn-both"   onclick="setToggle('budget','Любой')"   class="toggle-btn flex-1 py-2.5 rounded-xl border border-outline-variant text-sm font-semibold bg-surface hover:bg-surface-container transition-all">✅ Любой</button>
+          </div>
+        </div>
+
+        <!-- Общежитие -->
+        <div>
+          <label class="block text-xs font-semibold font-mono tracking-widest text-on-surface-variant uppercase mb-2">Нужно общежитие?</label>
+          <div class="flex gap-2">
+            <button id="btn-dorm-yes" onclick="setToggle('dorm','Да')"  class="toggle-btn flex-1 py-2.5 rounded-xl border border-outline-variant text-sm font-semibold bg-surface hover:bg-surface-container transition-all">🏠 Да</button>
+            <button id="btn-dorm-no"  onclick="setToggle('dorm','Нет')" class="toggle-btn flex-1 py-2.5 rounded-xl border border-outline-variant text-sm font-semibold bg-surface hover:bg-surface-container transition-all">🏙 Нет</button>
+          </div>
+        </div>
+
+        <!-- Save button -->
+        <button onclick="saveProfile()"
+          class="mt-2 w-full bg-primary-container text-white py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:brightness-95 active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-base">save</span>Сохранить профиль
+        </button>
+
+        <!-- Success banner (hidden) -->
+        <div id="save-success" class="hidden items-center gap-2 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-semibold">
+          <span class="material-symbols-outlined text-base">check_circle</span> Профиль сохранён!
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile preview card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-outline-variant p-6 sm:p-8 flex flex-col gap-4">
+      <h2 class="font-display font-bold text-xl mb-1">Текущий профиль</h2>
+      <p class="text-on-surface-variant text-sm -mt-1">Обновляется после сохранения</p>
+      <div id="profile-preview" class="flex flex-col gap-3 mt-2">
+        <p class="text-on-surface-variant text-sm italic">Профиль ещё не заполнен</p>
+      </div>
+      <div class="mt-auto pt-4 border-t border-outline-variant text-xs text-on-surface-variant flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-sm">info</span>
+        ИИ читает эти данные при каждом запросе
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TAB 2 — МОЁ ПОСТУПЛЕНИЕ
+══════════════════════════════════════════════════════════════ -->
+<div id="roadmap-tab" class="tab-panel max-w-6xl mx-auto px-4 sm:px-8 py-8">
+
+  <div class="bg-white rounded-2xl shadow-sm border border-outline-variant p-6 sm:p-8 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="font-display font-bold text-xl">Персональная дорожная карта</h2>
+        <p class="text-on-surface-variant text-sm mt-1">ИИ подберёт вузы, оценит шансы и список олимпиад — по данным из твоего профиля</p>
+      </div>
+      <button id="gen-roadmap-btn" onclick="generateRoadmap()"
+        class="flex-shrink-0 flex items-center gap-2 bg-primary-container text-white px-6 py-3 rounded-xl font-bold text-sm hover:brightness-95 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-base">auto_awesome</span>Сгенерировать карту
+      </button>
+    </div>
+  </div>
+
+  <!-- Результат -->
+  <div id="roadmap-result" class="bg-white rounded-2xl shadow-sm border border-outline-variant p-6 sm:p-8 min-h-[200px] flex items-center justify-center">
+    <div class="text-center text-on-surface-variant">
+      <span class="material-symbols-outlined text-5xl text-outline-variant block mb-3">route</span>
+      <p class="text-sm">Нажми «Сгенерировать карту», чтобы получить<br/>персональный план поступления</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TAB 3 — КАЛЕНДАРЬ
+══════════════════════════════════════════════════════════════ -->
+<div id="calendar-tab" class="tab-panel max-w-6xl mx-auto px-4 sm:px-8 py-8">
+
+  <div class="bg-white rounded-2xl shadow-sm border border-outline-variant overflow-hidden">
+    <div class="px-6 sm:px-8 py-5 border-b border-outline-variant flex items-center justify-between">
+      <div>
+        <h2 class="font-display font-bold text-xl">Календарь абитуриента 2026</h2>
+        <p class="text-on-surface-variant text-sm mt-0.5">Ключевые мероприятия и дедлайны</p>
+      </div>
+      <div class="flex gap-2 text-xs font-semibold hidden sm:flex">
+        <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-orange-500"></span>Высокая</span>
+        <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-amber-400"></span>Средняя</span>
+        <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-400"></span>Низкая</span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-surface-container-low text-on-surface-variant text-xs font-mono tracking-widest uppercase">
+            <th class="px-6 py-3 text-left">Мероприятие</th>
+            <th class="px-4 py-3 text-left">Дата</th>
+            <th class="px-4 py-3 text-left">Тип</th>
+            <th class="px-4 py-3 text-left">Важность</th>
+          </tr>
+        </thead>
+        <tbody id="calendar-body" class="divide-y divide-outline-variant/50">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TAB 4 — ИИ-НАСТАВНИК (чат)
+══════════════════════════════════════════════════════════════ -->
+<div id="chat-tab" class="tab-panel max-w-6xl mx-auto px-4 sm:px-8 py-8">
+
+  <div class="grid md:grid-cols-3 gap-6">
+
+    <!-- Chat window -->
+    <div class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-outline-variant flex flex-col" style="height:600px">
+      <div class="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🦊</span>
+          <div>
+            <p class="font-bold text-sm">АбитуриУм · ИИ-наставник</p>
+            <p class="text-xs text-on-surface-variant">Лис поможет разобраться со всем!</p>
+          </div>
+        </div>
+        <span class="flex items-center gap-1.5 text-xs text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full border border-green-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>Активен
+        </span>
+      </div>
+
+      <!-- Messages -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+        <div class="msg-base msg-ai">
+          <strong>Привет! Я — АбитуриУм 🦊</strong><br/>
+          Задай любой вопрос о поступлении, ЕГЭ или выборе вуза.<br/>
+          Также можешь нажать <strong>«Генератор апелляции»</strong> — помогу составить документ.
+        </div>
+      </div>
+
+      <!-- Input row -->
+      <div class="px-4 pb-4 pt-3 border-t border-outline-variant flex gap-2 items-end">
+        <textarea id="chat-input" rows="1" maxlength="800" placeholder="Задай вопрос наставнику..."
+          class="flex-1 resize-none border border-outline-variant rounded-xl px-4 py-3 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"></textarea>
+        <button id="chat-send-btn" onclick="chatSend()"
+          class="flex-shrink-0 bg-primary-container text-white p-3 rounded-xl hover:brightness-95 active:scale-95 transition-all">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar: Fox + Appeal generator -->
+    <div class="flex flex-col gap-4">
+
+      <!-- Fox mascot card -->
+      <div class="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-5 text-center">
+        <div class="text-7xl mb-2 select-none">🦊</div>
+        <h3 class="font-display font-bold text-base mb-1">Лис Абик</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Твой талисман и помощник по поступлению. Знает всё о вузах, ЕГЭ и апелляциях!</p>
+        <div class="mt-3 text-xs font-semibold text-primary bg-white/60 rounded-xl px-3 py-2 border border-orange-200">
+          💡 Лайфхак: спроси меня про олимпиады — они дают +10 к шансам!
+        </div>
+      </div>
+
+      <!-- Appeal generator card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-outline-variant p-5 flex flex-col gap-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">gavel</span>
+          <h3 class="font-display font-bold text-base">Генератор апелляции</h3>
+        </div>
+        <p class="text-xs text-on-surface-variant leading-relaxed">ИИ создаст структуру апелляции по результатам ЕГЭ/ОГЭ с аргументацией</p>
+
+        <input id="appeal-subject" type="text" placeholder="Предмет (Математика...)" maxlength="50"
+          class="border border-outline-variant rounded-xl px-4 py-2.5 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        <input id="appeal-task" type="text" placeholder="Номер задания (напр. 18)" maxlength="10"
+          class="border border-outline-variant rounded-xl px-4 py-2.5 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+        <input id="appeal-issue" type="text" placeholder="Суть несогласия (кратко)" maxlength="150"
+          class="border border-outline-variant rounded-xl px-4 py-2.5 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"/>
+
+        <button onclick="generateAppeal()"
+          class="w-full bg-on-surface text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-base">description</span>Создать апелляцию
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────────── -->
+<footer class="mt-16 bg-inverse-surface text-white/80">
+  <div class="max-w-6xl mx-auto px-4 sm:px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+    <span class="font-display font-bold text-white text-base">АбитуриУм</span>
+    <p>© 2026 АбитуриУм. Твой точный путь в вуз.</p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════════ -->
+<script>
+/* ── Toggle state ─────────────────────────────────────────── */
+const toggleState = { budget: 'Бюджет', dorm: 'Нет' };
+
+function setToggle(group, val) {
+  toggleState[group] = val;
+  const map = {
+    budget: { 'Бюджет':'btn-budget', 'Платно':'btn-paid', 'Любой':'btn-both' },
+    dorm:   { 'Да':'btn-dorm-yes', 'Нет':'btn-dorm-no' }
+  };
+  Object.values(map[group]).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('bg-primary-container','text-white','border-primary-container'); el.classList.add('bg-surface','text-on-surface'); }
+  });
+  const active = document.getElementById(map[group][val]);
+  if (active) { active.classList.add('bg-primary-container','text-white','border-primary-container'); active.classList.remove('bg-surface','text-on-surface'); }
+}
+setToggle('budget','Бюджет');
+setToggle('dorm','Нет');
+
+/* ── Profile ──────────────────────────────────────────────── */
+function getProfile() {
+  try { return JSON.parse(localStorage.getItem('plannerProfile') || '{}'); } catch { return {}; }
+}
+
+function renderProfilePreview(p) {
+  const el = document.getElementById('profile-preview');
+  if (!p.name && !p.city) { el.innerHTML = '<p class="text-on-surface-variant text-sm italic">Профиль ещё не заполнен</p>'; return; }
+  const row = (icon, label, val) => val ? `<div class="flex items-center gap-3 text-sm"><span class="material-symbols-outlined text-primary text-base">${icon}</span><span class="text-on-surface-variant">${label}:</span><span class="font-semibold">${val}</span></div>` : '';
+  el.innerHTML = [
+    row('person', 'Имя', p.name),
+    row('location_city', 'Город', p.city),
+    row('school', 'Направление', p.specialty),
+    row('grade', 'Баллы', p.score ? p.score + ' баллов' : ''),
+    row('payments', 'Форма', p.budget),
+    row('home', 'Общежитие', p.dorm),
+  ].join('');
+}
+
+function saveProfile() {
+  const p = {
+    name:      document.getElementById('p-name').value.trim(),
+    city:      document.getElementById('p-city').value.trim(),
+    score:     document.getElementById('p-score').value.trim(),
+    specialty: document.getElementById('p-specialty').value.trim(),
+    budget:    toggleState.budget,
+    dorm:      toggleState.dorm,
+  };
+  localStorage.setItem('plannerProfile', JSON.stringify(p));
+  renderProfilePreview(p);
+  const s = document.getElementById('save-success');
+  s.classList.remove('hidden'); s.classList.add('flex');
+  setTimeout(() => { s.classList.add('hidden'); s.classList.remove('flex'); }, 2500);
+}
+
+function loadProfileIntoForm() {
+  const p = getProfile();
+  if (p.name)      document.getElementById('p-name').value = p.name;
+  if (p.city)      document.getElementById('p-city').value = p.city;
+  if (p.score)     document.getElementById('p-score').value = p.score;
+  if (p.specialty) document.getElementById('p-specialty').value = p.specialty;
+  if (p.budget)    setToggle('budget', p.budget);
+  if (p.dorm)      setToggle('dorm',   p.dorm);
+  renderProfilePreview(p);
+}
+loadProfileIntoForm();
+
+/* ── Profile string for AI ───────────────────────────────── */
+function profileContext() {
+  const p = getProfile();
+  if (!p.name && !p.city && !p.score) return '';
+  const parts = [];
+  if (p.name)      parts.push(`Имя: ${p.name}`);
+  if (p.city)      parts.push(`Желаемый город: ${p.city}`);
+  if (p.specialty) parts.push(`Направление: ${p.specialty}`);
+  if (p.score)     parts.push(`Планируемые баллы: ${p.score}`);
+  if (p.budget)    parts.push(`Форма обучения: ${p.budget}`);
+  if (p.dorm)      parts.push(`Общежитие нужно: ${p.dorm}`);
+  return '\n\n---\nДАННЫЕ ПОЛЬЗОВАТЕЛЯ:\n' + parts.join('\n');
+}
+
+/* ── AI helper ────────────────────────────────────────────── */
+const SYSTEM_BASE = `Ты — «АбитуриУм», профессиональный наставник по поступлению в российские вузы в 2026 году.
+Отвечай СТРОГО в формате Markdown: используй ### для разделов, ** для ключевых понятий, маркированные и нумерованные списки, таблицы где нужно.
+Ты эксперт по ЕГЭ/ОГЭ, проходным баллам, выбору вузов, олимпиадам и апелляциям. Тон: дружелюбный, экспертный, лаконичный.`;
+
+async function callAI(userMsg, extraSystemNote = '') {
+  const systemPrompt = SYSTEM_BASE + profileContext() + (extraSystemNote ? '\n\n' + extraSystemNote : '');
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      systemPrompt,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || `Ошибка ${res.status}`); }
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.reply;
+}
+
+function renderMarkdown(text) {
+  return DOMPurify.sanitize(marked.parse(text));
+}
+
+/* ── Tab 2: Roadmap ───────────────────────────────────────── */
+async function generateRoadmap() {
+  const p = getProfile();
+  const resultEl = document.getElementById('roadmap-result');
+  const btn = document.getElementById('gen-roadmap-btn');
+
+  resultEl.innerHTML = `<div class="flex flex-col items-center gap-3 text-on-surface-variant py-8">
+    <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <p class="text-sm">ИИ анализирует твой профиль и подбирает вузы...</p>
+  </div>`;
+  btn.disabled = true;
+  btn.classList.add('opacity-60','cursor-not-allowed');
+
+  const prompt = `Составь персональную дорожную карту поступления для следующего абитуриента.
+
+Обязательно включи:
+### 🎓 Подходящие вузы
+Таблица: Вуз | Проходной балл | Вероятность (Высокая/Средняя/Низкая) | Комментарий
+
+### 🏆 Полезные олимпиады
+Список олимпиад (с датами регистрации и уровнем), которые дадут льготы при поступлении по выбранному направлению.
+
+### 📋 Пошаговый план
+Нумерованный список: что делать с сейчас до подачи документов.
+
+### ⚠️ Риски и советы
+Что стоит учесть конкретно в этой ситуации.`;
+
+  try {
+    const reply = await callAI(prompt);
+    resultEl.innerHTML = `<div class="prose prose-sm max-w-none msg-ai" style="all:unset; display:block; font-size:.9375rem; line-height:1.6;">${renderMarkdown(reply)}</div>`;
+    // Re-apply styles to the rendered content
+    resultEl.firstChild && resultEl.firstChild.classList && resultEl.firstChild.classList.add('roadmap-content');
+  } catch(e) {
+    resultEl.innerHTML = `<p class="text-error text-sm">Ошибка: ${e.message}</p>`;
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('opacity-60','cursor-not-allowed');
+  }
+}
+
+// Apply markdown styles to roadmap result
+const roadmapStyle = document.createElement('style');
+roadmapStyle.textContent = `
+  #roadmap-result h3 { font-size:1.05rem; font-weight:700; margin:.8em 0 .4em; color:#a83900; }
+  #roadmap-result h2 { font-size:1.15rem; font-weight:800; margin:.8em 0 .4em; }
+  #roadmap-result ul, #roadmap-result ol { padding-left:1.4em; margin:.4em 0; }
+  #roadmap-result li { margin:.25em 0; }
+  #roadmap-result strong { font-weight:700; }
+  #roadmap-result table { border-collapse:collapse; width:100%; margin:.6em 0; font-size:.85rem; }
+  #roadmap-result th, #roadmap-result td { border:1px solid #e4beb1; padding:.35em .65em; text-align:left; }
+  #roadmap-result th { background:#fff3eb; font-weight:700; }
+  #roadmap-result p { margin:.4em 0; }
+`;
+document.head.appendChild(roadmapStyle);
+
+/* ── Tab 3: Calendar data ─────────────────────────────────── */
+const calendarEvents = [
+  { name: 'Регистрация на Всероссийскую олимпиаду (заочный тур)', date: '01 июля 2025', type: 'Олимпиада',     importance: 'high' },
+  { name: 'День открытых дверей — МГУ',                           date: '19 окт. 2025',  type: 'День дверей',  importance: 'mid'  },
+  { name: 'День открытых дверей — МФТИ',                          date: '02 нояб. 2025', type: 'День дверей',  importance: 'mid'  },
+  { name: 'День открытых дверей — ИТМО',                          date: '16 нояб. 2025', type: 'День дверей',  importance: 'mid'  },
+  { name: 'Олимпиада «Высшая проба» НИУ ВШЭ — регистрация',       date: '15 нояб. 2025', type: 'Олимпиада',    importance: 'high' },
+  { name: 'Олимпиада «Ломоносов» МГУ — регистрация',              date: '01 дек. 2025',  type: 'Олимпиада',    importance: 'high' },
+  { name: 'Подготовительные курсы — начало',                      date: '01 сент. 2025', type: 'Обучение',     importance: 'mid'  },
+  { name: 'Дедлайн — подача заявления на ЕГЭ',                    date: '01 февр. 2026', type: 'ЕГЭ',          importance: 'high' },
+  { name: 'ЕГЭ по Русскому языку',                                date: '25 мая 2026',   type: 'ЕГЭ',          importance: 'high' },
+  { name: 'ЕГЭ по Математике (профиль)',                          date: '29 мая 2026',   type: 'ЕГЭ',          importance: 'high' },
+  { name: 'ЕГЭ по Информатике',                                   date: '11 июня 2026',  type: 'ЕГЭ',          importance: 'high' },
+  { name: 'Начало приёма документов в вузы',                      date: '20 июня 2026',  type: 'Поступление',  importance: 'high' },
+  { name: 'Дедлайн подачи документов (приоритетное зачисление)',  date: '25 июля 2026',  type: 'Поступление',  importance: 'high' },
+  { name: 'Основная волна зачисления',                            date: '05 авг. 2026',  type: 'Поступление',  importance: 'high' },
+  { name: 'День открытых дверей — НГУ Новосибирск',               date: '09 нояб. 2025', type: 'День дверей',  importance: 'low'  },
+  { name: 'Конкурс научных работ школьников',                     date: '15 янв. 2026',  type: 'Олимпиада',    importance: 'low'  },
+  { name: 'Олимпиада МГТУ им. Баумана',                           date: '10 янв. 2026',  type: 'Олимпиада',    importance: 'mid'  },
+];
+
+function renderCalendar() {
+  const tbody = document.getElementById('calendar-body');
+  const impLabels = { high:'🔴 Высокая', mid:'🟡 Средняя', low:'🟢 Низкая' };
+  const rowClass  = { high:'cal-row-high', mid:'cal-row-mid', low:'cal-row-low' };
+  tbody.innerHTML = calendarEvents.map(e => `
+    <tr class="${rowClass[e.importance]} hover:bg-surface-container-low transition-colors">
+      <td class="px-6 py-3 font-medium">${e.name}</td>
+      <td class="px-4 py-3 text-on-surface-variant whitespace-nowrap font-mono text-xs">${e.date}</td>
+      <td class="px-4 py-3"><span class="bg-surface-container-low px-2.5 py-1 rounded-full text-xs font-semibold">${e.type}</span></td>
+      <td class="px-4 py-3 text-xs font-semibold whitespace-nowrap">${impLabels[e.importance]}</td>
+    </tr>`).join('');
+}
+renderCalendar();
+
+/* ── Tab 4: Chat ──────────────────────────────────────────── */
+const chatHistory = [];
+let chatBusy = false;
+
+function appendChatMsg(html, role) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg-base msg-${role}`;
+  div.innerHTML = html;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return div;
+}
+
+function showChatLoading() {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.id = 'chat-loading';
+  div.className = 'msg-base msg-ai';
+  div.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeChatLoading() {
+  const el = document.getElementById('chat-loading');
+  if (el) el.remove();
+}
+
+async function chatSend() {
+  if (chatBusy) return;
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  appendChatMsg(text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'), 'user');
+  inp.value = '';
+  inp.style.height = 'auto';
+  chatBusy = true;
+  document.getElementById('chat-send-btn').disabled = true;
+  showChatLoading();
+
+  chatHistory.push({ role: 'user', content: text });
+  if (chatHistory.length > 20) chatHistory.splice(0, 2);
+
+  try {
+    const systemPrompt = SYSTEM_BASE + profileContext();
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ systemPrompt, messages: chatHistory })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    removeChatLoading();
+    chatHistory.push({ role: 'assistant', content: data.reply });
+    appendChatMsg(renderMarkdown(data.reply), 'ai');
+  } catch(e) {
+    removeChatLoading();
+    appendChatMsg(`<strong>Ошибка:</strong> ${e.message}`, 'ai');
+  } finally {
+    chatBusy = false;
+    document.getElementById('chat-send-btn').disabled = false;
+    document.getElementById('chat-input').focus();
+  }
+}
+
+// Enter key in chat
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatSend(); }
+});
+// Auto-grow textarea
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+/* ── Appeal generator ─────────────────────────────────────── */
+async function generateAppeal() {
+  const subject = document.getElementById('appeal-subject').value.trim();
+  const task    = document.getElementById('appeal-task').value.trim();
+  const issue   = document.getElementById('appeal-issue').value.trim();
+  const p = getProfile();
+
+  if (!subject) { alert('Укажи предмет'); return; }
+
+  const prompt = `Составь структуру апелляции по результатам ЕГЭ.
+
+Данные:
+- ФИО участника: ${p.name || 'Иванов Иван Иванович'}
+- Предмет: ${subject}
+- Номер задания: ${task || 'не указан'}
+- Суть несогласия: ${issue || 'не указана'}
+
+Создай полный документ апелляции со следующими разделами:
+### 📄 Шапка документа
+### 📝 Текст апелляции
+(с формулировкой несогласия, ссылками на критерии оценивания ФИПИ и аргументацией)
+### ✅ Список приложений
+### 💡 Советы по подаче`;
+
+  const chatWrap = document.getElementById('chat-messages');
+  switchTab('chat-tab', document.querySelector('[onclick="switchTab(\'chat-tab\',this)"]'));
+
+  appendChatMsg(`<em>🗂 Запрос на генерацию апелляции: ${subject}${task ? ', задание ' + task : ''}</em>`, 'user');
+  chatBusy = true;
+  showChatLoading();
+
+  try {
+    const reply = await callAI(prompt, 'Ты помогаешь составить официальный документ — апелляцию по ЕГЭ. Используй юридически грамотные формулировки.');
+    removeChatLoading();
+    appendChatMsg(renderMarkdown(reply), 'ai');
+  } catch(e) {
+    removeChatLoading();
+    appendChatMsg(`<strong>Ошибка:</strong> ${e.message}`, 'ai');
+  } finally {
+    chatBusy = false;
+  }
+}
+
+/* ── Tab switching ────────────────────────────────────────── */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active-tab');
+    b.classList.add('text-on-surface-variant');
+  });
+  document.getElementById(id).classList.add('active');
+  if (btn) {
+    btn.classList.add('active-tab');
+    btn.classList.remove('text-on-surface-variant');
+  }
+}
+
+/* ── Mobile drawer ────────────────────────────────────────── */
+const mobHamburger = document.getElementById('mob-hamburger');
+const mobDrawer    = document.getElementById('mob-drawer');
+const mobOverlay   = document.getElementById('mob-overlay');
+const mobIcon      = document.getElementById('mob-icon');
+function openMob()  { mobDrawer.classList.remove('translate-x-full'); mobOverlay.classList.remove('hidden'); mobIcon.textContent='close'; document.body.style.overflow='hidden'; }
+function closeMob() { mobDrawer.classList.add('translate-x-full');    mobOverlay.classList.add('hidden');    mobIcon.textContent='menu';  document.body.style.overflow='';       }
+mobHamburger.addEventListener('click', () => mobDrawer.classList.contains('translate-x-full') ? openMob() : closeMob());
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeMob(); });
+</script>
+</body>
+</html>
