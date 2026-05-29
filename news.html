@@ -121,7 +121,7 @@
 <a href="index.html" class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">АбитуриУм</a>
 <div class="hidden md:flex items-center gap-8">
 <a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="code.html">Баллы</a>
-<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="ai-workspace.html">Ассистент</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="ai-chat.html">Ассистент</a>
 <a class="text-primary font-bold border-b-2 border-primary font-body-md text-body-md" href="news.html">Новости</a>
 </div>
 <button class="bg-primary-container text-white px-6 py-2 rounded-full font-label-caps text-label-caps hover:bg-primary transition-all duration-200 active:scale-95" onclick="window.location.href='code.html'">Начать</button>
@@ -149,7 +149,7 @@
 <!-- Bento Grid Layout -->
 <div class="grid grid-cols-1 md:grid-cols-12 gap-bento-gap">
 <!-- Featured Article (Span 8) -->
-<article class="bento-card md:col-span-8 bg-white rounded-[24px] border border-outline-variant p-8 relative overflow-hidden group cursor-pointer" onclick="window.location.href='#news-details'">
+<article class="bento-card md:col-span-8 bg-white rounded-[24px] border border-outline-variant p-8 relative overflow-hidden group cursor-pointer" onclick="openArticle('obshch')">
 <div class="flex flex-col h-full justify-between relative z-10">
 <div>
 <span class="inline-block bg-primary-container/10 text-primary px-3 py-1 rounded-full font-label-caps text-label-caps mb-6">ЕГЭ 2026</span>
@@ -183,7 +183,7 @@
 </div>
 </div>
 <!-- News Item (Span 4) -->
-<article class="bento-card md:col-span-4 bg-white rounded-[24px] border border-outline-variant p-6 cursor-pointer" onclick="window.location.href='#news-details'">
+<article class="bento-card md:col-span-4 bg-white rounded-[24px] border border-outline-variant p-6 cursor-pointer" onclick="openArticle('oge')">
 <div class="aspect-video bg-surface-container rounded-xl mb-6 overflow-hidden">
 <img alt="Study equipment on white desk" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9KyeA4tyq38HFudCo61LfZW7zI5cHaP4QdWla7jiuanL40SbhjBY3Nq-AJwPdGgSMFns-K0_lAt_nEqNlpDs4hij75-bJ16syI5dXTGKlezxNp7cccWi4xFs3iNbrQ21G0Lm-yCHro_4i_8ZkoWa-2oP5gMM_bgkm3p5SkW-5eOFpQKzZmvOM8VFUHaKtO40TU6NOBqbkCC64IU2ol49oO9krk-TQ6aTzoaBnUERsCVxWTCc4ItVBqSpqBhdh1LASe0uFVwOUd6I">
 </div>
@@ -205,7 +205,7 @@
 <button class="text-on-surface font-label-caps text-label-caps border-b border-on-surface hover:text-primary hover:border-primary transition-colors inline-block mx-auto">ПОЛУЧИТЬ ПРОГНОЗ</button>
 </div>
 <!-- News Item (Span 4) -->
-<article class="bento-card md:col-span-4 bg-white rounded-[24px] border border-outline-variant p-6 cursor-pointer" onclick="window.location.href='#news-details'">
+<article class="bento-card md:col-span-4 bg-white rounded-[24px] border border-outline-variant p-6 cursor-pointer" onclick="openArticle('vuzy')">
 <div class="aspect-video bg-surface-container rounded-xl mb-6 overflow-hidden">
 <img alt="Modern university library" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6RwkmNF-AH_wGUYQImzXZ2vfVfeI4UsurJKDA3BGxbNnuHJvxzzYZ60p0GMFCjKzVBk73m8hoFjsZr5ELgQkbyXFhGMeK2BiK6YkeqYO01cH7DxDRVdYtrNJkqChmpBoAlpi8YGHEBlJEGzDYCSszFw_nAi_wSynB9ETs3tN19Dc7H1EvfQ2wUzg5vCmV4Tf4V5O9Kfm6LFUU9IXuADB2kMqR17jYNEXl2IprFBpkaEFp52aBuaJEiRaVKyoy1KnSenkgAi0NTBM">
 </div>
@@ -231,11 +231,14 @@
 </form>
 </div>
 </section>
-<!-- News Detail Placeholder -->
-<div id="news-details" class="mt-section-gap bento-card p-12 text-center bg-white border border-outline-variant rounded-[24px]">
-<span class="material-symbols-outlined text-4xl text-primary-container mb-4" style="font-variation-settings: 'FILL' 1;">article</span>
-<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Полный текст статьи</h2>
-<p class="font-body-md text-body-md text-on-surface-variant">Скоро здесь появится полный текст статьи. Следите за обновлениями!</p>
+<!-- Article Modal -->
+<div id="article-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeArticle()">
+  <div class="bg-white rounded-[24px] max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8 relative">
+    <button onclick="closeArticle()" class="absolute top-6 right-6 w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-outline-variant transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant">close</span>
+    </button>
+    <div id="article-content"></div>
+  </div>
 </div>
 </main>
 <!-- Footer -->
@@ -262,6 +265,94 @@
 </div>
 </footer>
 <script>
+        // ── Articles data ──────────────────────────────────────────
+        const articles = {
+            obshch: {
+                tag: 'ЕГЭ 2026',
+                date: '14 ОКТ 2025',
+                title: 'Изменения в подсчёте баллов по обществознанию: что нужно знать',
+                body: `
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-4">В 2026 году ФИПИ ввёл обновлённые критерии оценки задания №29 — эссе по обществознанию. Главное изменение касается требований к аргументации.</p>
+                    <h4 class="font-bold text-on-surface mb-2">Что изменилось</h4>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant font-body-md mb-4">
+                        <li>Каждый аргумент теперь должен содержать <strong>конкретный пример</strong> — без него балл не засчитывается.</li>
+                        <li>Вводятся дополнительные критерии логичности изложения (+2 балла).</li>
+                        <li>Максимальный балл за задание увеличился с 6 до 7.</li>
+                    </ul>
+                    <h4 class="font-bold text-on-surface mb-2">Как подготовиться</h4>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant font-body-md mb-4">
+                        <li>Разбирайте эталонные ответы из демоверсий 2025–2026 годов.</li>
+                        <li>Практикуйтесь писать эссе с таймером: 25 минут на задание.</li>
+                        <li>Используйте структуру: тезис → аргумент + пример → вывод.</li>
+                    </ul>
+                    <p class="font-body-md text-sm text-on-surface-variant">Источник: ФИПИ, методические рекомендации 2026.</p>`
+            },
+            oge: {
+                tag: 'ОГЭ 2026',
+                date: '12 ОКТ 2025',
+                title: 'Демоверсии ОГЭ 2026 опубликованы',
+                body: `
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-4">ФИПИ опубликовал контрольно-измерительные материалы (КИМ) для 9 классов. Демоверсии доступны на официальном сайте fipi.ru.</p>
+                    <h4 class="font-bold text-on-surface mb-2">Ключевые изменения по предметам</h4>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant font-body-md mb-4">
+                        <li><strong>Математика:</strong> добавлено задание на функциональную грамотность (реальные жизненные ситуации).</li>
+                        <li><strong>Русский язык:</strong> увеличен объём сжатого изложения до 70–90 слов.</li>
+                        <li><strong>Информатика:</strong> новый тип задания на работу с базами данных.</li>
+                        <li><strong>Обществознание:</strong> изменена структура второй части — добавлен анализ статистики.</li>
+                    </ul>
+                    <h4 class="font-bold text-on-surface mb-2">Где найти демоверсии</h4>
+                    <p class="font-body-md text-on-surface-variant mb-4">Все материалы размещены на <strong>fipi.ru → ОГЭ → Демоверсии 2026</strong>. Там же — спецификации и кодификаторы.</p>
+                    <p class="font-body-md text-sm text-on-surface-variant">Дата публикации: октябрь 2025.</p>`
+            },
+            vuzy: {
+                tag: 'ВУЗЫ',
+                date: '10 ОКТ 2025',
+                title: 'Топ-10 вузов расширили квоты на IT-направления',
+                body: `
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-4">В рамках государственной программы цифровизации экономики ведущие университеты страны объявили об увеличении бюджетных мест на 2026/27 учебный год.</p>
+                    <h4 class="font-bold text-on-surface mb-2">Сколько мест добавлено</h4>
+                    <div class="space-y-2 mb-4">
+                        ${[['МФТИ', '+120 мест', 'Прикладная математика и информатика'],['НИУ ВШЭ', '+80 мест', 'Программная инженерия'],['ИТМО', '+150 мест', 'Информационные технологии'],['МГУ', '+60 мест', 'Компьютерные науки'],['МИФИ', '+90 мест', 'Кибербезопасность']].map(([uni, count, dir]) => `
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-surface-container-low border border-outline-variant">
+                            <div><span class="font-bold text-on-surface text-sm">${uni}</span><span class="text-xs text-on-surface-variant ml-2">${dir}</span></div>
+                            <span class="font-label-caps text-xs text-primary-container font-bold">${count}</span>
+                        </div>`).join('')}
+                    </div>
+                    <h4 class="font-bold text-on-surface mb-2">Что это значит для абитуриентов</h4>
+                    <p class="font-body-md text-on-surface-variant mb-4">Конкуренция на IT-направления по-прежнему высока, однако больше мест снижает проходной балл на 3–5 пунктов по сравнению с 2025 годом.</p>
+                    <p class="font-body-md text-sm text-on-surface-variant">По данным Министерства науки и высшего образования РФ.</p>`
+            }
+        };
+
+        function openArticle(id) {
+            const article = articles[id];
+            if (!article) return;
+            document.getElementById('article-content').innerHTML = `
+                <span class="inline-block bg-primary-container/10 text-primary px-3 py-1 rounded-full font-label-caps text-label-caps mb-4">${article.tag}</span>
+                <h2 class="font-headline-md text-[22px] font-bold text-on-surface mb-2 leading-snug pr-8">${article.title}</h2>
+                <p class="font-label-caps text-[10px] text-on-surface-variant mb-6">${article.date} · Команда АбитуриУм</p>
+                <div>${article.body}</div>
+                <div class="mt-8 pt-6 border-t border-outline-variant">
+                    <a href="ai-chat.html" class="inline-flex items-center gap-2 bg-primary-container text-white px-6 py-3 rounded-full font-label-caps text-label-caps hover:brightness-110 transition-all">
+                        <span class="material-symbols-outlined text-sm">smart_toy</span>
+                        Задать вопрос ИИ-наставнику
+                    </a>
+                </div>`;
+            const modal = document.getElementById('article-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeArticle() {
+            const modal = document.getElementById('article-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeArticle(); });
+
         // Micro-interactions for Bento Cards
         document.querySelectorAll('.bento-card').forEach(card => {
             card.addEventListener('mouseenter', () => {

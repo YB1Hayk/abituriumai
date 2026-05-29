@@ -141,7 +141,7 @@
             </a>
 <nav class="hidden md:flex items-center gap-8">
 <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="code.html">Баллы</a>
-<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="ai-workspace.html">Ассистент</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="ai-chat.html">Ассистент</a>
 <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="news.html">Новости</a>
 </nav>
 <a href="code.html#subjectsGrid" class="bg-primary-container text-white px-6 py-2 rounded-full font-label-caps text-label-caps hover:brightness-95 transition-all scale-95 active:scale-90">Начать</a>
@@ -390,17 +390,49 @@
                 }
             });
 
+            const container = document.getElementById('resultsSection');
+            container.classList.remove('hidden');
+
+            // Валидация: нет выбранных предметов
+            if (subjectCount === 0) {
+                container.innerHTML = `
+                    <div class="bento-card p-8 animate-slide-up border-2 border-primary-container/30">
+                        <div class="text-center py-6">
+                            <span class="material-symbols-outlined text-5xl text-primary-container mb-4 block">assignment</span>
+                            <h3 class="font-headline-md text-xl font-bold text-on-surface mb-2">Выберите предметы и введите баллы</h3>
+                            <p class="font-body-md text-sm text-on-secondary-container">Нажмите на карточки предметов выше, чтобы выбрать их, и введите свои баллы ЕГЭ.</p>
+                        </div>
+                    </div>`;
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+
             const selectedCities = getSelectedCities();
             const budgetType = getBudgetType();
 
-            const margin = 20;
-            const filteredList = mockUniversities.filter(u =>
-                (selectedCities.length === 0 || selectedCities.includes(u.city)) &&
-                (totalScore >= u.points - margin)
-            ).sort((a, b) => b.chance.replace('%','') - a.chance.replace('%',''));
+            // Фильтрация: сначала по городу, потом сортируем по близости к проходному баллу
+            let cityFiltered = mockUniversities.filter(u =>
+                selectedCities.includes(u.city)
+            );
+            // Если ни одного не нашлось по городу — показываем все
+            if (cityFiltered.length === 0) cityFiltered = [...mockUniversities];
 
-            const container = document.getElementById('resultsSection');
-            container.classList.remove('hidden');
+            // Добавляем индивидуальный шанс на основе введённых баллов
+            const avgPerSubject = totalScore / subjectCount;
+            const projectedTotal = avgPerSubject * 3; // проецируем на 3 предмета
+
+            const withChance = cityFiltered.map(u => {
+                const diff = projectedTotal - u.points;
+                let chance;
+                if (diff >= 20)       chance = '95%';
+                else if (diff >= 10)  chance = '85%';
+                else if (diff >= 0)   chance = '70%';
+                else if (diff >= -15) chance = '45%';
+                else if (diff >= -30) chance = '20%';
+                else                  chance = '5%';
+                return { ...u, chance };
+            }).sort((a, b) => parseInt(b.chance) - parseInt(a.chance));
+
             container.innerHTML = `
                 <div class="bento-card p-8 animate-slide-up">
                     <div class="flex items-center gap-3 mb-6">
@@ -410,36 +442,33 @@
                     </div>
                     <h3 class="font-headline-md text-2xl font-bold text-on-surface mb-2">Результаты подбора</h3>
                     <p class="font-body-md text-sm text-on-secondary-container mb-2">
-                        На основе ${subjectCount} предметов. Сумма баллов: <strong>${totalScore}</strong>.
-                        Города: <strong>${selectedCities.join(', ')}</strong>.
-                        Форма: <strong>${budgetType}</strong>.
+                        Введено предметов: <strong>${subjectCount}</strong>. Сумма баллов: <strong>${totalScore}</strong>.
+                        Прогноз суммы (3 предмета): <strong>~${Math.round(projectedTotal)}</strong>.
                     </p>
                     <p class="font-body-md text-sm text-on-secondary-container mb-8">
-                        Найдено подходящих вузов: <strong>${filteredList.length}</strong>
+                        Города: <strong>${selectedCities.join(', ')}</strong> · Форма: <strong>${budgetType}</strong> · Найдено вузов: <strong>${withChance.length}</strong>
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${filteredList.length > 0 ? filteredList.map(u => `
+                        ${withChance.map(u => {
+                            const chanceNum = parseInt(u.chance);
+                            const color = chanceNum >= 70 ? 'text-green-600' : chanceNum >= 40 ? 'text-yellow-600' : 'text-red-500';
+                            return `
                             <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant flex justify-between items-center">
                                 <div>
-                                    <h4 class="font-bold text-lg text-on-surface">${u.name}</h4>
-                                    <p class="text-sm text-on-surface-variant mt-1">Шанс: ${u.chance}. Проходной: ${u.points} баллов. ${u.city}</p>
+                                    <h4 class="font-bold text-base text-on-surface">${u.name}</h4>
+                                    <p class="text-xs text-on-surface-variant mt-1">Проходной: <strong>${u.points}</strong> · ${u.city}</p>
                                     <span class="inline-block mt-2 px-2 py-1 bg-white border border-outline-variant rounded text-[10px] font-label-caps uppercase">${u.badge}</span>
                                 </div>
-                                <span class="font-label-caps text-2xl text-primary-container font-bold">${u.chance}</span>
-                            </div>
-                        `).join('') : `
-                            <div class="md:col-span-2 text-center p-8 text-on-surface-variant">
-                                <span class="material-symbols-outlined text-4xl mb-2 block">search_off</span>
-                                <p>К сожалению, для выбранных параметров подходящих вузов не найдено. Попробуйте расширить критерии.</p>
-                            </div>
-                        `}
+                                <span class="font-label-caps text-2xl font-bold ${color} ml-4 shrink-0">${u.chance}</span>
+                            </div>`;
+                        }).join('')}
                     </div>
-                    <div class="mt-8 pt-6 border-t border-outline-variant flex justify-between items-center">
-                        <p class="font-label-caps text-[10px] text-on-surface-variant">ПОДБОРКА СФОРМИРОВАНА НА ОСНОВЕ ВАШИХ ДАННЫХ</p>
-                        <span class="flex items-center gap-1 font-label-caps text-[10px] text-primary-container">
-                            <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-                            AI READY
-                        </span>
+                    <div class="mt-8 pt-6 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <p class="font-label-caps text-[10px] text-on-surface-variant">ШАНСЫ РАССЧИТАНЫ НА ОСНОВЕ ПРОХОДНЫХ БАЛЛОВ 2025</p>
+                        <a href="ai-chat.html" class="flex items-center gap-2 bg-primary-container text-white px-5 py-2 rounded-full font-label-caps text-[11px] hover:brightness-110 transition-all">
+                            <span class="material-symbols-outlined text-sm">smart_toy</span>
+                            Спросить ИИ-наставника
+                        </a>
                     </div>
                 </div>
             `;

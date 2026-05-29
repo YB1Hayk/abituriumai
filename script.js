@@ -1,6 +1,6 @@
 /* ── АбитуриУм · AI Chat Logic ──────────────────────────────── */
 
-const GROQ_API_KEY   = "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"; // реальный ключ хранится на GitHub
+const OPENAI_API_KEY = "OPENAI_KEY_HERE"; // реальный ключ хранится на GitHub
 const TAVILY_API_KEY = "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";
 
 /* ── Conversation history ─────────────────────────────────── */
@@ -136,14 +136,14 @@ async function sendMessageToAI(userMessage) {
         conversationHistory.splice(0, 2);
     }
 
-    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const groqRes = await fetch("https://api.openai.com/v1/chat/completions", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GROQ_API_KEY}`
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-            model: "llama-3.3-70b-versatile",
+            model: "gpt-4o-mini",
             messages: [
                 { role: "system", content: systemContent },
                 ...conversationHistory
