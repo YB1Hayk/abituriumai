@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>АбитуриУм | ИИ-наставник</title>
+  <meta name="description" content="АбитуриУм — ИИ-наставник по поступлению в российские вузы. Задайте вопрос про ЕГЭ, ОГЭ, проходные баллы и выбор специальности." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -106,7 +108,7 @@
   <!-- Chat window -->
   <div class="chat-window" style="margin-top:1.25rem">
 
-    <div id="chat-messages" class="chat-messages">
+    <div id="chat-messages" class="chat-messages" aria-live="polite" aria-label="Чат с ИИ-наставником">
       <!-- Welcome message -->
       <div class="msg msg-ai">
         Здравствуйте! Я — <strong>АбитуриУм</strong>, ваш персональный наставник по поступлению в российские вузы.<br><br>
@@ -121,13 +123,17 @@
           placeholder="Например: какие вузы принимают на IT с 250 баллами?"
           rows="1"
           autocomplete="off"
+          maxlength="800"
         ></textarea>
         <button id="send-btn" class="btn-send">
           Отправить
           <span class="material-symbols-outlined" style="font-size:18px">send</span>
         </button>
       </div>
-      <p class="input-hint">Enter — отправить · Shift+Enter — новая строка</p>
+      <div class="input-meta">
+        <p class="input-hint">Enter — отправить · Shift+Enter — новая строка</p>
+        <span id="char-counter" class="char-counter">0 / 800</span>
+      </div>
     </div>
 
   </div>
@@ -149,6 +155,7 @@
   </div>
 </footer>
 
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="script.js"></script>
 </body>
 </html>

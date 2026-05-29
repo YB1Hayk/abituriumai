@@ -1,7 +1,11 @@
 /* ── АбитуриУм · AI Chat Logic ──────────────────────────────── */
 
-const GROQ_API_KEY   = "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";
+const GROQ_API_KEY   = "GROQ_KEY_HERE"; // реальный ключ хранится на GitHub
 const TAVILY_API_KEY = "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";
+
+/* ── Conversation history ─────────────────────────────────── */
+const conversationHistory = [];
+const MAX_HISTORY = 10; // last N user+assistant pairs
 
 const SYSTEM_PROMPT = `Ты — «АбитуриУм», профессиональный наставник по поступлению в российские вузы в 2026 году.
 
@@ -23,6 +27,8 @@ const chatInput    = document.getElementById('chat-input');
 const sendBtn      = document.getElementById('send-btn');
 const guideBox     = document.getElementById('guide-box');
 const guideToggle  = document.getElementById('guide-toggle');
+const charCounter  = document.getElementById('char-counter');
+const toast        = document.getElementById('toast');
 
 /* ── Mobile drawer ────────────────────────────────────────── */
 const hamburger    = document.getElementById('nav-hamburger');
@@ -61,6 +67,15 @@ document.addEventListener('keydown', (e) => {
 guideToggle.addEventListener('click', () => {
     guideBox.classList.toggle('hidden');
 });
+
+/* ── Toast ────────────────────────────────────────────────── */
+let toastTimer = null;
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
 
 /* ── Render helpers ───────────────────────────────────────── */
 function escapeHtml(text) {
@@ -113,6 +128,14 @@ async function sendMessageToAI(userMessage) {
 
     const systemContent = SYSTEM_PROMPT + (context ? `\n\n---\nАКТУАЛЬНЫЙ КОНТЕКСТ ИЗ ИНТЕРНЕТА:\n${context}` : "");
 
+    // Add user message to history
+    conversationHistory.push({ role: "user", content: userMessage });
+
+    // Keep only the last MAX_HISTORY messages
+    while (conversationHistory.length > MAX_HISTORY * 2) {
+        conversationHistory.splice(0, 2);
+    }
+
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: 'POST',
         headers: {
@@ -122,8 +145,8 @@ async function sendMessageToAI(userMessage) {
         body: JSON.stringify({
             model: "llama-3.3-70b-versatile",
             messages: [
-                { role: "system",  content: systemContent },
-                { role: "user",    content: userMessage }
+                { role: "system", content: systemContent },
+                ...conversationHistory
             ],
             temperature: 0.7,
             max_tokens: 1500
@@ -131,30 +154,44 @@ async function sendMessageToAI(userMessage) {
     });
 
     if (groqRes.status === 429) {
+        // Remove the user message we just added since request failed
+        conversationHistory.pop();
         const retryAfter = groqRes.headers.get('retry-after') || '30';
         const secs = parseInt(retryAfter, 10) || 30;
         throw Object.assign(new Error('rate_limit'), { retryAfter: secs });
     }
 
     if (!groqRes.ok) {
+        conversationHistory.pop();
         throw new Error(`Сервер вернул ошибку ${groqRes.status}. Попробуй позже.`);
     }
 
     const data = await groqRes.json();
 
-    if (data.error) throw new Error(data.error.message);
+    if (data.error) {
+        conversationHistory.pop();
+        throw new Error(data.error.message);
+    }
 
-    return data.choices[0].message.content;
+    const reply = data.choices[0].message.content;
+
+    // Save assistant reply to history
+    conversationHistory.push({ role: "assistant", content: reply });
+
+    return reply;
 }
 
 /* ── Send flow ────────────────────────────────────────────── */
+let rateLimited = false;
+
 async function handleSend() {
     const text = chatInput.value.trim();
-    if (!text || sendBtn.disabled) return;
+    if (!text || sendBtn.disabled || rateLimited) return;
 
     appendMessage(escapeHtml(text), 'user');
     chatInput.value = '';
     chatInput.style.height = 'auto';
+    updateCharCounter();
 
     sendBtn.disabled = true;
     showLoading();
@@ -165,16 +202,18 @@ async function handleSend() {
         const rawHtml  = marked.parse(reply);
         const safeHtml = DOMPurify.sanitize(rawHtml);
         appendMessage(safeHtml, 'ai');
+        sendBtn.disabled = false;
+        chatInput.focus();
     } catch (err) {
         removeLoading();
         if (err.message === 'rate_limit') {
+            rateLimited = true;
             startRateLimitCountdown(err.retryAfter || 30);
         } else {
             appendMessage(`<strong>Ошибка:</strong> ${escapeHtml(err.message || 'Не удалось получить ответ.')}`, 'ai');
+            sendBtn.disabled = false;
+            chatInput.focus();
         }
-    } finally {
-        sendBtn.disabled = false;
-        chatInput.focus();
     }
 }
 
@@ -188,10 +227,26 @@ chatInput.addEventListener('keydown', (e) => {
     }
 });
 
-/* Auto-grow textarea */
+/* Auto-grow textarea + char counter */
+function updateCharCounter() {
+    const len = chatInput.value.length;
+    const max = parseInt(chatInput.getAttribute('maxlength') || '800', 10);
+    charCounter.textContent = `${len} / ${max}`;
+    charCounter.classList.toggle('warn', len >= max * 0.9);
+}
+
 chatInput.addEventListener('input', () => {
     chatInput.style.height = 'auto';
     chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+    updateCharCounter();
+});
+
+/* Footer dead links */
+document.querySelectorAll('.footer-links a[href="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        showToast('Раздел «' + a.textContent.trim() + '» скоро появится');
+    });
 });
 
 /* ── Rate limit countdown ─────────────────────────────────── */
@@ -217,6 +272,7 @@ function startRateLimitCountdown(seconds) {
         if (remaining <= 0) {
             clearInterval(timer);
             msgDiv.innerHTML = '✅ Готов! Можешь задавать следующий вопрос.';
+            rateLimited = false;
             sendBtn.disabled = false;
             chatInput.disabled = false;
             chatInput.focus();

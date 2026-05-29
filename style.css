@@ -385,10 +385,8 @@ a { text-decoration: none; color: inherit; }
 }
 
 .input-hint {
-  margin-top: 0.5rem;
   font-size: 0.75rem;
   color: var(--text-faint);
-  text-align: right;
 }
 
 /* ── Footer ────────────────────────────────────────────────── */
@@ -588,4 +586,60 @@ a { text-decoration: none; color: inherit; }
   .btn-send { padding: 0.875rem 1rem; }
 
   .btn-send span { display: none; }
+}
+
+/* ── Disabled input state ──────────────────────────────────── */
+#chat-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--border);
+}
+
+/* ── Input meta row (hint + char counter) ──────────────────── */
+.input-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.input-hint {
+  margin-top: 0;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.char-counter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+  transition: color .2s;
+}
+
+.char-counter.warn {
+  color: #e04000;
+  font-weight: 600;
+}
+
+/* ── Toast notification ────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--inverse);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
 }
