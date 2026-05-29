@@ -1,6 +1,6 @@
 /* ── АбитуриУм · AI Chat Logic ──────────────────────────────── */
 
-const OPENAI_API_KEY = "OPENAI_KEY_HERE"; // реальный ключ хранится на GitHub
+const OPENAI_API_KEY = "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 реальный ключ хранится на GitHub
 const TAVILY_API_KEY = "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";
 
 /* ── Conversation history ─────────────────────────────────── */
