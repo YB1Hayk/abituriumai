@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AbituriUm — Календарь 2026</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "tertiary-container":"#825600","on-tertiary":"#ffffff","secondary-fixed-dim":"#ffb693",
+          "on-background":"#1d1a21","surface-container-high":"#ede6f0","surface-bright":"#fef7ff",
+          "surface":"#fef7ff","surface-container-lowest":"#ffffff","on-error":"#ffffff",
+          "on-error-container":"#93000a","outline-variant":"#cbc3d4","surface-container-low":"#f8f1fb",
+          "on-primary":"#ffffff","on-tertiary-container":"#ffd295","on-secondary":"#ffffff",
+          "background":"#fef7ff","error-container":"#ffdad6","tertiary-fixed":"#ffddb2",
+          "on-primary-fixed-variant":"#532f9b","primary-fixed-dim":"#d1bcff","inverse-surface":"#322f37",
+          "on-tertiary-fixed":"#291800","on-secondary-container":"#612400","on-secondary-fixed-variant":"#7a2f00",
+          "surface-tint":"#6b49b5","primary-fixed":"#eaddff","primary-container":"#6c4ab6",
+          "surface-container-highest":"#e7e0ea","on-primary-container":"#e2d3ff","primary":"#54309c",
+          "inverse-on-surface":"#f5eef8","tertiary":"#634000","secondary-container":"#ff7a30",
+          "error":"#ba1a1a","surface-variant":"#e7e0ea","surface-dim":"#ded8e2",
+          "on-surface-variant":"#494552","secondary-fixed":"#ffdbcc","on-secondary-fixed":"#351000",
+          "on-surface":"#1d1a21","on-primary-fixed":"#24005b","tertiary-fixed-dim":"#f7bc64",
+          "secondary":"#a04100","outline":"#7a7483","surface-container":"#f2ecf6",
+          "on-tertiary-fixed-variant":"#624000","inverse-primary":"#d1bcff"
+        },
+        spacing: {
+          "stack-lg":"24px","container-margin-mobile":"16px","gutter":"16px",
+          "container-margin-desktop":"48px","base":"8px","stack-md":"12px","stack-sm":"4px"
+        },
+        fontFamily: { "sans": ["Plus Jakarta Sans","sans-serif"] },
+        fontSize: {
+          "body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],
+          "headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],
+          "headline-lg-mobile":["24px",{"lineHeight":"30px","fontWeight":"700"}],
+          "body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}],
+          "headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],
+          "label-bold":["12px",{"lineHeight":"16px","fontWeight":"700"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family:'Plus Jakarta Sans',sans-serif; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); }
+  .custom-scrollbar::-webkit-scrollbar { width:4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background:transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background:#cbc3d4; border-radius:10px; }
+</style>
+</head>
+<body class="bg-background text-on-background font-sans overflow-x-hidden">
+<div class="flex min-h-screen">
+
+<!-- ── Sidebar (desktop) ───────────────────────────────────── -->
+<aside class="hidden md:flex flex-col h-screen py-8 px-4 gap-4 bg-surface-container-low sticky top-0 w-64 shrink-0 border-r border-outline-variant/20">
+  <div class="flex items-center gap-3 px-2 mb-2">
+    <div class="w-10 h-10 rounded-full overflow-hidden bg-secondary-fixed flex-shrink-0">
+      <img alt="Лис AbituriUm" src="fox.png" class="w-full h-full object-cover" style="mix-blend-mode:multiply"/>
+    </div>
+    <div>
+      <h1 class="text-headline-md font-bold text-primary">AbituriUm</h1>
+      <p class="text-body-sm text-on-surface-variant">Ваш мудрый наставник</p>
+    </div>
+  </div>
+
+  <nav class="flex flex-col gap-1 mt-4 flex-1">
+    <a href="index.html"    class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg text-body-lg">
+      <span class="material-symbols-outlined">home</span>Главная
+    </a>
+    <a href="planner.html"  class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg text-body-lg">
+      <span class="material-symbols-outlined">map</span>Планировщик
+    </a>
+    <a href="calendar.html" class="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-primary-container/10 rounded-lg text-body-lg">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">calendar_today</span>Календарь
+    </a>
+    <a href="ai-chat.html"  class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg text-body-lg">
+      <span class="material-symbols-outlined">smart_toy</span>Наставник
+    </a>
+    <a href="code.html"     class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg text-body-lg">
+      <span class="material-symbols-outlined">calculate</span>Калькулятор
+    </a>
+    <a href="news.html"     class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg text-body-lg">
+      <span class="material-symbols-outlined">newspaper</span>Новости
+    </a>
+    <a href="profile.html"  class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg text-body-lg">
+      <span class="material-symbols-outlined">person</span>Кабинет
+    </a>
+  </nav>
+
+  <div class="p-4 bg-secondary-container/10 rounded-xl">
+    <p class="text-body-sm text-secondary mb-3">Готовы к поступлению?</p>
+    <a href="planner.html" class="block w-full bg-secondary-container text-white text-label-bold font-bold py-3 rounded-lg hover:brightness-95 transition-all text-center">Начать путь</a>
+  </div>
+</aside>
+
+<!-- ── Main ────────────────────────────────────────────────── -->
+<main class="flex-1 flex flex-col min-w-0 mb-20 md:mb-0">
+
+  <!-- Top bar -->
+  <header class="flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop h-16 z-50 bg-surface sticky top-0 border-b border-outline-variant/20">
+    <span class="md:hidden text-headline-md font-bold text-primary">AbituriUm</span>
+    <div class="hidden md:flex gap-8">
+      <span class="text-body-lg text-primary border-b-2 border-primary pb-1 font-semibold">Календарь 2026</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="profile.html" class="p-2 rounded-full hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined text-primary">account_circle</span>
+      </a>
+      <button id="mob-btn" class="md:hidden p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant">
+        <span class="material-symbols-outlined" id="mob-icon">menu</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div id="mob-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="closeMob()"></div>
+  <div id="mob-drawer" class="fixed top-0 right-0 h-full w-72 bg-surface z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+      <span class="text-headline-md font-bold text-primary">AbituriUm</span>
+      <button onclick="closeMob()" class="p-1 text-on-surface-variant material-symbols-outlined">close</button>
+    </div>
+    <div class="flex flex-col gap-1 p-4 flex-grow">
+      <a href="index.html"    class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">home</span>Главная</a>
+      <a href="planner.html"  class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">map</span>Планировщик</a>
+      <a href="calendar.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-container/10 text-primary font-bold text-body-sm"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">calendar_today</span>Календарь</a>
+      <a href="ai-chat.html"  class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">smart_toy</span>Наставник</a>
+      <a href="code.html"     class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">calculate</span>Калькулятор</a>
+      <a href="news.html"     class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">newspaper</span>Новости</a>
+      <a href="profile.html"  class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">person</span>Кабинет</a>
+    </div>
+    <div class="p-4 border-t border-outline-variant">
+      <a href="planner.html" class="block text-center bg-secondary-container text-white px-6 py-3 rounded-lg font-bold hover:brightness-95">Начать путь</a>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="px-container-margin-mobile md:px-container-margin-desktop py-8 max-w-[1200px] mx-auto w-full">
+
+    <!-- Header + Legend -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+      <div>
+        <h2 class="text-headline-lg-mobile md:text-headline-lg text-primary mb-2 font-bold">Академический календарь 2026</h2>
+        <p class="text-body-lg text-on-surface-variant">Отслеживайте важные дедлайны и события в одном месте</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <div class="flex items-center gap-2 px-4 py-2 bg-surface-container border border-outline-variant rounded-full">
+          <span class="w-3 h-3 rounded-full bg-error"></span>
+          <span class="text-label-bold font-bold text-on-surface">Дедлайны / ЕГЭ</span>
+        </div>
+        <div class="flex items-center gap-2 px-4 py-2 bg-surface-container border border-outline-variant rounded-full">
+          <span class="w-3 h-3 rounded-full bg-primary"></span>
+          <span class="text-label-bold font-bold text-on-surface">Дни открытых дверей</span>
+        </div>
+        <div class="flex items-center gap-2 px-4 py-2 bg-surface-container border border-outline-variant rounded-full">
+          <span class="w-3 h-3 rounded-full bg-secondary-container"></span>
+          <span class="text-label-bold font-bold text-on-surface">Олимпиады</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar Bento Grid (generated by JS) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-gutter mb-12" id="months-grid"></div>
+
+    <!-- Expanded Month Detail -->
+    <section class="hidden mb-12" id="detail-section">
+      <div class="bg-surface-container-high rounded-3xl p-6 md:p-10 relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-8 md:right-8 md:bottom-0 w-28 md:w-44 opacity-15 pointer-events-none select-none">
+          <img alt="Лис" src="fox.png" class="w-full h-auto" style="mix-blend-mode:multiply"/>
+        </div>
+        <div class="flex items-center gap-4 mb-8">
+          <button onclick="closeDetails()" class="p-2 hover:bg-surface-container-highest rounded-full transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h2 class="text-headline-lg text-primary font-bold" id="selected-month-title">Январь</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10" id="detail-events"></div>
+      </div>
+    </section>
+
+    <!-- Fox tip section -->
+    <section class="bg-secondary-fixed text-on-secondary-fixed p-6 rounded-3xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden mb-8">
+      <div class="w-28 h-28 md:w-36 md:h-36 shrink-0 relative">
+        <div class="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
+        <img alt="Лис советник" src="fox.png" class="w-full h-full object-contain relative z-10" style="mix-blend-mode:multiply"/>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-headline-lg-mobile font-bold mb-2">Совет от лиса 🦊</h3>
+        <p class="text-body-lg opacity-90 mb-5">«Нажми на любой месяц — я покажу важные дедлайны и события. Рекомендую добавить напоминания за 3 дня до каждого дедлайна, чтобы успеть подготовить все документы без стресса!»</p>
+        <a href="ai-chat.html" class="inline-flex items-center gap-2 bg-secondary text-white text-label-bold font-bold px-6 py-3 rounded-full hover:shadow-lg transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[18px]">smart_toy</span>Спросить наставника
+        </a>
+      </div>
+    </section>
+
+  </div>
+</main>
+</div>
+
+<!-- Mobile bottom nav -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 bg-surface/95 backdrop-blur-md shadow-lg border-t border-outline-variant/20">
+  <a href="index.html"    class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">home</span>Главная</a>
+  <a href="planner.html"  class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">map</span>Маршрут</a>
+  <a href="calendar.html" class="flex flex-col items-center justify-center bg-secondary-container text-white rounded-full px-4 py-1 text-[10px]">
+    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">calendar_today</span>Календарь
+  </a>
+  <a href="ai-chat.html"  class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">smart_toy</span>Лис</a>
+  <a href="profile.html"  class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">person</span>Кабинет</a>
+</nav>
+
+<script>
+/* ── Event data 2025–2026 ─────────────────────────────────── */
+// Each event: { day, type:'red'|'blue'|'orange', title, desc }
+// red = deadline/ЕГЭ, blue = open day, orange = olympiad
+const EVENTS = {
+  "Июль 2025": {
+    days: 31,
+    red:    [1],
+    blue:   [],
+    orange: [1],
+    items: [
+      { type:'red',    day:1,  title:'Регистрация на Всероссийскую олимпиаду',  desc:'Открытие регистрации на заочный тур ВсОШ по всем предметам.' },
+    ]
+  },
+  "Сентябрь 2025": {
+    days: 30,
+    red:    [],
+    blue:   [],
+    orange: [1],
+    items: [
+      { type:'orange', day:1,  title:'Подготовительные курсы — начало',         desc:'Старт курсов ЕГЭ/ОГЭ в большинстве вузов и онлайн-платформ.' },
+    ]
+  },
+  "Октябрь 2025": {
+    days: 31,
+    red:    [],
+    blue:   [19],
+    orange: [],
+    items: [
+      { type:'blue',   day:19, title:'День открытых дверей — МГУ',              desc:'Онлайн-трансляция с деканами. Ответы на вопросы абитуриентов.' },
+    ]
+  },
+  "Ноябрь 2025": {
+    days: 30,
+    red:    [15],
+    blue:   [2, 9, 16],
+    orange: [],
+    items: [
+      { type:'red',    day:15, title:'Олимпиада «Высшая проба» НИУ ВШЭ',       desc:'Последний день регистрации на олимпиаду профильного уровня.' },
+      { type:'blue',   day:2,  title:'День открытых дверей — МФТИ',             desc:'Живые выступления деканов факультетов Физтеха.' },
+      { type:'blue',   day:9,  title:'День открытых дверей — НГУ Новосибирск',  desc:'Онлайн-формат. Вопросы и ответы по поступлению.' },
+      { type:'blue',   day:16, title:'День открытых дверей — ИТМО',             desc:'Экскурсия по кампусу + консультации по направлениям.' },
+    ]
+  },
+  "Декабрь 2025": {
+    days: 31,
+    red:    [1],
+    blue:   [],
+    orange: [1],
+    items: [
+      { type:'red',    day:1,  title:'Олимпиада «Ломоносов» МГУ — регистрация', desc:'Открытие регистрации. Портфолио и заявки подаются онлайн.' },
+    ]
+  },
+  "Январь 2026": {
+    days: 31,
+    red:    [10, 15],
+    blue:   [],
+    orange: [],
+    items: [
+      { type:'red',    day:10, title:'Олимпиада МГТУ им. Баумана',              desc:'Регистрация и первый тур по математике и физике.' },
+      { type:'red',    day:15, title:'Конкурс научных работ школьников',        desc:'Дедлайн подачи научных проектов для участия.' },
+    ]
+  },
+  "Февраль 2026": {
+    days: 28,
+    red:    [1],
+    blue:   [],
+    orange: [],
+    items: [
+      { type:'red',    day:1,  title:'Дедлайн заявления на ЕГЭ',               desc:'Последний день подачи заявления на участие в ЕГЭ через школу.' },
+    ]
+  },
+  "Май 2026": {
+    days: 31,
+    red:    [25, 29],
+    blue:   [],
+    orange: [],
+    items: [
+      { type:'red',    day:25, title:'ЕГЭ — Русский язык',                      desc:'Единый государственный экзамен по русскому языку. 3 часа 30 минут.' },
+      { type:'red',    day:29, title:'ЕГЭ — Математика (Профиль)',              desc:'Профильный ЕГЭ по математике. 3 часа 55 минут.' },
+    ]
+  },
+  "Июнь 2026": {
+    days: 30,
+    red:    [11, 20],
+    blue:   [],
+    orange: [],
+    items: [
+      { type:'red',    day:11, title:'ЕГЭ — Информатика',                       desc:'ЕГЭ по информатике в формате компьютерного тестирования.' },
+      { type:'red',    day:20, title:'Начало приёма документов в вузы',         desc:'Открытие приёмной кампании во всех российских вузах.' },
+    ]
+  },
+  "Июль 2026": {
+    days: 31,
+    red:    [25],
+    blue:   [],
+    orange: [],
+    items: [
+      { type:'red',    day:25, title:'Дедлайн подачи документов',               desc:'Последний день подачи документов для приоритетного зачисления.' },
+    ]
+  },
+  "Август 2026": {
+    days: 31,
+    red:    [5],
+    blue:   [],
+    orange: [],
+    items: [
+      { type:'red',    day:5,  title:'Основная волна зачисления',               desc:'Публикация приказов о зачислении. Дедлайн согласия на зачисление.' },
+    ]
+  },
+};
+
+const TYPE_COLOR = {
+  red:    'bg-error text-on-error',
+  blue:   'bg-primary text-on-primary',
+  orange: 'bg-secondary-container text-white',
+};
+const TYPE_BADGE = {
+  red:    'bg-error-container text-on-error-container',
+  blue:   'bg-primary-container text-on-primary-container',
+  orange: 'bg-secondary-fixed text-on-secondary-fixed',
+};
+const TYPE_BORDER = {
+  red:    'border-error',
+  blue:   'border-primary',
+  orange: 'border-secondary-container',
+};
+const TYPE_LABEL = {
+  red:    'Дедлайн / ЕГЭ',
+  blue:   'День открытых дверей',
+  orange: 'Олимпиада',
+};
+
+/* ── Render month mini-cards ──────────────────────────────── */
+function renderGrid() {
+  const grid = document.getElementById('months-grid');
+  Object.keys(EVENTS).forEach(monthKey => {
+    const m = EVENTS[monthKey];
+    const hasEvents = m.items.length > 0;
+    const card = document.createElement('div');
+    card.onclick = () => expandMonth(monthKey);
+    card.className = `group bg-surface-container-low border border-transparent
+      ${hasEvents ? 'hover:border-primary/20 hover:shadow-lg cursor-pointer' : 'opacity-60 cursor-default'}
+      p-5 rounded-2xl transition-all duration-300`;
+
+    // Build mini day grid
+    let dayDivs = '';
+    for (let d = 1; d <= m.days; d++) {
+      let cls = 'text-on-surface-variant';
+      if (m.red?.includes(d))    cls = 'bg-error text-on-error rounded-full font-bold';
+      else if (m.blue?.includes(d))   cls = 'bg-primary text-on-primary rounded-full font-bold';
+      else if (m.orange?.includes(d)) cls = 'bg-secondary-container text-white rounded-full font-bold';
+      dayDivs += `<div class="aspect-square flex items-center justify-center text-[9px] ${cls}">${d}</div>`;
+    }
+
+    // Event count badges
+    const totalEvents = m.items.length;
+    const badgeHtml = hasEvents
+      ? `<span class="ml-auto text-[10px] font-bold bg-primary-container/15 text-primary px-2 py-0.5 rounded-full">${totalEvents} событ.</span>`
+      : '';
+
+    card.innerHTML = `
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">${monthKey}</h3>
+        <span class="material-symbols-outlined text-outline ${hasEvents ? 'group-hover:text-primary group-hover:translate-x-1' : ''} transition-all">chevron_right</span>
+      </div>
+      ${badgeHtml ? `<div class="flex mb-3">${badgeHtml}</div>` : ''}
+      <div class="calendar-grid gap-[2px]">${dayDivs}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ── Expand month detail ──────────────────────────────────── */
+function expandMonth(monthKey) {
+  const m = EVENTS[monthKey];
+  if (!m || m.items.length === 0) return;
+
+  document.getElementById('selected-month-title').textContent = monthKey;
+
+  // Group by type
+  const byType = { red:[], blue:[], orange:[] };
+  m.items.forEach(ev => byType[ev.type].push(ev));
+
+  let html = '';
+  ['red','blue','orange'].forEach(type => {
+    if (byType[type].length === 0) return;
+    html += `<div class="space-y-4">
+      <h4 class="text-label-bold font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full ${TYPE_COLOR[type].split(' ')[0]}"></span>
+        ${TYPE_LABEL[type]}
+      </h4>`;
+    byType[type].forEach(ev => {
+      html += `
+        <div class="bg-surface-container-lowest p-5 rounded-2xl border-l-4 ${TYPE_BORDER[type]} shadow-sm">
+          <div class="flex flex-wrap justify-between items-start gap-2 mb-2">
+            <p class="text-headline-md font-semibold text-on-surface">${ev.title}</p>
+            <span class="${TYPE_BADGE[type]} px-3 py-1 rounded-full text-[12px] font-bold whitespace-nowrap">${ev.day} числа</span>
+          </div>
+          <p class="text-body-sm text-on-surface-variant">${ev.desc}</p>
+        </div>`;
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('detail-events').innerHTML = html;
+
+  const section = document.getElementById('detail-section');
+  section.classList.remove('hidden');
+  setTimeout(() => section.scrollIntoView({ behavior:'smooth', block:'start' }), 50);
+}
+
+function closeDetails() {
+  document.getElementById('detail-section').classList.add('hidden');
+}
+
+/* ── Mobile drawer ────────────────────────────────────────── */
+const mobBtn    = document.getElementById('mob-btn');
+const mobDrawer = document.getElementById('mob-drawer');
+const mobOverlay= document.getElementById('mob-overlay');
+const mobIcon   = document.getElementById('mob-icon');
+function openMob()  { mobDrawer.classList.remove('translate-x-full'); mobOverlay.classList.remove('hidden'); mobIcon.textContent='close'; document.body.style.overflow='hidden'; }
+function closeMob() { mobDrawer.classList.add('translate-x-full');    mobOverlay.classList.add('hidden');    mobIcon.textContent='menu';  document.body.style.overflow=''; }
+mobBtn.addEventListener('click', () => mobDrawer.classList.contains('translate-x-full') ? openMob() : closeMob());
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeMob(); });
+
+/* ── Init ─────────────────────────────────────────────────── */
+renderGrid();
+</script>
+</body>
+</html>
