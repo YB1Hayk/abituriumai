@@ -1,171 +1,494 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html class="light" lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>АбитуриУм | ИИ-наставник</title>
-  <meta name="description" content="АбитуриУм — ИИ-наставник по поступлению в российские вузы. Задайте вопрос про ЕГЭ, ОГЭ, проходные баллы и выбор специальности." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AbituriUm — Наставник</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "tertiary-container":"#825600","on-tertiary":"#ffffff","secondary-fixed-dim":"#ffb693",
+          "on-background":"#1d1a21","surface-container-high":"#ede6f0","surface-bright":"#fef7ff",
+          "surface":"#fef7ff","surface-container-lowest":"#ffffff","on-error":"#ffffff",
+          "on-error-container":"#93000a","outline-variant":"#cbc3d4","surface-container-low":"#f8f1fb",
+          "on-primary":"#ffffff","on-tertiary-container":"#ffd295","on-secondary":"#ffffff",
+          "background":"#fef7ff","error-container":"#ffdad6","tertiary-fixed":"#ffddb2",
+          "on-primary-fixed-variant":"#532f9b","primary-fixed-dim":"#d1bcff","inverse-surface":"#322f37",
+          "on-tertiary-fixed":"#291800","on-secondary-container":"#612400","on-secondary-fixed-variant":"#7a2f00",
+          "surface-tint":"#6b49b5","primary-fixed":"#eaddff","primary-container":"#6c4ab6",
+          "surface-container-highest":"#e7e0ea","on-primary-container":"#e2d3ff","primary":"#54309c",
+          "inverse-on-surface":"#f5eef8","tertiary":"#634000","secondary-container":"#ff7a30",
+          "error":"#ba1a1a","surface-variant":"#e7e0ea","surface-dim":"#ded8e2",
+          "on-surface-variant":"#494552","secondary-fixed":"#ffdbcc","on-secondary-fixed":"#351000",
+          "on-surface":"#1d1a21","on-primary-fixed":"#24005b","tertiary-fixed-dim":"#f7bc64",
+          "secondary":"#a04100","outline":"#7a7483","surface-container":"#f2ecf6",
+          "on-tertiary-fixed-variant":"#624000","inverse-primary":"#d1bcff"
+        },
+        spacing: {
+          "stack-lg":"24px","container-margin-mobile":"16px","gutter":"16px",
+          "container-margin-desktop":"48px","base":"8px","stack-md":"12px","stack-sm":"4px"
+        },
+        fontFamily: { "sans": ["Plus Jakarta Sans","sans-serif"] },
+        fontSize: {
+          "body-lg":  ["16px",{"lineHeight":"24px","fontWeight":"400"}],
+          "headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],
+          "headline-lg-mobile":["24px",{"lineHeight":"30px","fontWeight":"700"}],
+          "body-sm":  ["14px",{"lineHeight":"20px","fontWeight":"400"}],
+          "headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],
+          "label-bold":["12px",{"lineHeight":"16px","fontWeight":"700"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  /* Scrollbar */
+  .chat-container::-webkit-scrollbar { width:4px; }
+  .chat-container::-webkit-scrollbar-track { background:transparent; }
+  .chat-container::-webkit-scrollbar-thumb { background:#cbc3d4; border-radius:10px; }
 
-  <!-- Material Symbols -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  /* Pulse ring around fox avatar */
+  @keyframes pulse-orange {
+    0%   { box-shadow:0 0 0 0 rgba(255,122,48,.45); }
+    70%  { box-shadow:0 0 0 12px rgba(255,122,48,0); }
+    100% { box-shadow:0 0 0 0 rgba(255,122,48,0); }
+  }
+  .pulse-secondary { animation:pulse-orange 2s infinite; }
 
-  <!-- Markdown renderer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
-  <!-- XSS sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+  /* Loading dots */
+  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%;
+         background:#6c4ab6; margin:0 2px; animation:blink 1.4s infinite both; }
+  .dot:nth-child(2){animation-delay:.2s}
+  .dot:nth-child(3){animation-delay:.4s}
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
+  /* Markdown inside AI bubble */
+  .ai-md h3 { font-size:1rem; font-weight:700; margin:.6em 0 .3em; }
+  .ai-md ul, .ai-md ol { padding-left:1.3em; margin:.4em 0; }
+  .ai-md li  { margin:.2em 0; }
+  .ai-md strong { font-weight:700; }
+  .ai-md table { border-collapse:collapse; width:100%; margin:.5em 0; font-size:.85rem; }
+  .ai-md th, .ai-md td { border:1px solid #cbc3d4; padding:.3em .6em; text-align:left; }
+  .ai-md th  { background:#f8f1fb; }
+  .ai-md a   { color:#54309c; text-decoration:underline; }
+  .ai-md code { background:#f2ecf6; border-radius:4px; padding:0 .3em; font-size:.82em; }
+  .ai-md p   { margin:.35em 0; }
+</style>
 </head>
-<body>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row overflow-hidden">
 
-<!-- ── Header ──────────────────────────────────────────────── -->
-<header class="site-header">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">АбитуриУм</a>
-
-    <nav class="nav-links">
-      <a href="code.html">Калькулятор</a>
-      <a href="ai-chat.html" class="active">Ассистент</a>
-      <a href="news.html">Новости</a>
-      <a href="profile.html">Кабинет</a>
-      <a href="planner.html">Планировщик</a>
-      <a href="code.html" class="btn-nav">Начать</a>
-    </nav>
-
-    <button class="nav-hamburger" id="nav-hamburger" aria-label="Меню" aria-expanded="false">
-      <span class="material-symbols-outlined" id="hamburger-icon">menu</span>
-    </button>
-  </div>
-</header>
-
-<!-- ── Mobile drawer ────────────────────────────────────────── -->
-<div id="mobile-overlay" class="mobile-overlay" aria-hidden="true"></div>
-<nav id="mobile-drawer" class="mobile-drawer" aria-label="Мобильная навигация">
-  <div class="mobile-drawer-header">
-    <span class="nav-logo">АбитуриУм</span>
-    <button id="drawer-close" aria-label="Закрыть меню">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-  </div>
-  <div class="mobile-drawer-links">
-    <a href="code.html">
-      <span class="material-symbols-outlined">calculate</span>
-      Калькулятор
-    </a>
-    <a href="ai-chat.html" class="active">
-      <span class="material-symbols-outlined">smart_toy</span>
-      Ассистент
-    </a>
-    <a href="news.html">
-      <span class="material-symbols-outlined">newspaper</span>
-      Новости
-    </a>
-    <a href="profile.html">
-      <span class="material-symbols-outlined">person</span>
-      Кабинет
-    </a>
-    <a href="planner.html">
-      <span class="material-symbols-outlined">map</span>
-      Планировщик
-    </a>
-  </div>
-  <div class="mobile-drawer-footer">
-    <a href="code.html" class="btn-nav" style="display:block;text-align:center;padding:.75rem;">Начать</a>
-  </div>
-</nav>
-
-<!-- ── Main ────────────────────────────────────────────────── -->
-<main class="main-container">
-
-  <div class="page-hero">
-    <div class="hero-row">
-      <h1>ИИ-наставник</h1>
-      <span class="ai-status">
-        <span class="pulse-dot"></span>
-        АбитуриУм активен
-      </span>
+<!-- ── Sidebar (desktop) ───────────────────────────────────── -->
+<aside class="hidden md:flex flex-col h-screen py-8 px-4 gap-stack-lg bg-surface-container-low border-r border-outline-variant/20 w-64 flex-shrink-0">
+  <!-- Logo -->
+  <div class="flex items-center gap-stack-md mb-4">
+    <div class="w-12 h-12 rounded-full overflow-hidden bg-primary-container/20 flex items-center justify-center flex-shrink-0">
+      <img alt="Лис AbituriUm" src="fox.png" class="w-full h-full object-cover" style="mix-blend-mode:multiply"/>
     </div>
-    <p>Задайте вопрос о поступлении, ЕГЭ, ОГЭ или выборе вуза.</p>
-  </div>
-
-  <!-- Guide -->
-  <button id="guide-toggle" class="guide-toggle">
-    <span class="material-symbols-outlined" style="font-size:16px">help_outline</span>
-    Как пользоваться?
-  </button>
-
-  <div id="guide-box" class="guide-box hidden" style="margin-top:.75rem">
-    <div style="display:flex;gap:.75rem;align-items:flex-start">
-      <span class="material-symbols-outlined" style="color:var(--primary);flex-shrink:0;font-variation-settings:'FILL' 1">lightbulb</span>
-      <div>
-        <p style="font-weight:600;margin-bottom:.5rem">Гайд по использованию:</p>
-        <ol>
-          <li>Задавайте вопросы по ЕГЭ/ОГЭ — расписание, проходные баллы, подготовка.</li>
-          <li>Спрашивайте про дедлайны вузов, документы, направления.</li>
-          <li>Нажмите <kbd style="background:var(--surface);padding:.1em .4em;border-radius:4px;border:1px solid var(--border);font-family:monospace">Enter</kbd> или кнопку «Отправить».</li>
-        </ol>
-      </div>
+    <div>
+      <h1 class="text-headline-md font-bold text-primary">AbituriUm</h1>
+      <p class="text-body-sm text-on-surface-variant">Ваш мудрый наставник</p>
     </div>
   </div>
 
-  <!-- Chat window -->
-  <div class="chat-window" style="margin-top:1.25rem">
+  <!-- Nav -->
+  <nav class="flex flex-col gap-stack-sm flex-1">
+    <a href="index.html"    class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg">
+      <span class="material-symbols-outlined">home</span><span class="text-body-lg">Главная</span>
+    </a>
+    <a href="planner.html"  class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg">
+      <span class="material-symbols-outlined">map</span><span class="text-body-lg">Планировщик</span>
+    </a>
+    <a href="planner.html"  class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg">
+      <span class="material-symbols-outlined">calendar_today</span><span class="text-body-lg">Календарь</span>
+    </a>
+    <a href="ai-chat.html"  class="flex items-center gap-stack-md px-4 py-3 text-primary font-bold bg-primary-container/10 rounded-lg">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">smart_toy</span>
+      <span class="text-body-lg">Наставник</span>
+    </a>
+    <a href="code.html"     class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg">
+      <span class="material-symbols-outlined">calculate</span><span class="text-body-lg">Калькулятор</span>
+    </a>
+    <a href="news.html"     class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg">
+      <span class="material-symbols-outlined">newspaper</span><span class="text-body-lg">Новости</span>
+    </a>
+    <a href="profile.html"  class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg">
+      <span class="material-symbols-outlined">person</span><span class="text-body-lg">Кабинет</span>
+    </a>
+  </nav>
 
-    <div id="chat-messages" class="chat-messages" aria-live="polite" aria-label="Чат с ИИ-наставником">
-      <!-- Welcome message -->
-      <div class="msg msg-ai">
-        Здравствуйте! Я — <strong>АбитуриУм</strong>, ваш персональный наставник по поступлению в российские вузы.<br><br>
-        Спрашивайте про ЕГЭ, ОГЭ, проходные баллы, выбор специальности или дедлайны — отвечу структурированно и по делу. 🎓
+  <a href="planner.html" class="block w-full bg-secondary-container text-white font-bold py-4 rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-sm text-center text-body-lg">
+    Начать путь
+  </a>
+</aside>
+
+<!-- ── Main content ────────────────────────────────────────── -->
+<main class="flex-1 flex flex-col h-screen relative bg-surface">
+
+  <!-- Top bar -->
+  <header class="flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop h-16 flex-shrink-0 border-b border-outline-variant/20 bg-surface">
+    <div class="flex items-center gap-stack-md">
+      <span class="md:hidden text-headline-md font-bold text-primary">AbituriUm</span>
+      <div class="hidden md:flex items-center gap-stack-sm px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant/30">
+        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+        <span class="text-label-bold text-on-surface-variant">Наставник в сети</span>
       </div>
     </div>
-
-    <div class="chat-input-area">
-      <div class="input-row">
-        <textarea
-          id="chat-input"
-          placeholder="Например: какие вузы принимают на IT с 250 баллами?"
-          rows="1"
-          autocomplete="off"
-          maxlength="800"
-        ></textarea>
-        <button id="send-btn" class="btn-send">
-          Отправить
-          <span class="material-symbols-outlined" style="font-size:18px">send</span>
-        </button>
-      </div>
-      <div class="input-meta">
-        <p class="input-hint">Enter — отправить · Shift+Enter — новая строка</p>
-        <span id="char-counter" class="char-counter">0 / 800</span>
-      </div>
+    <div class="flex items-center gap-2">
+      <a href="profile.html" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">account_circle</span>
+      </a>
+      <!-- Mobile hamburger -->
+      <button id="mob-btn" class="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low">
+        <span class="material-symbols-outlined" id="mob-icon">menu</span>
+      </button>
     </div>
+  </header>
 
+  <!-- Mobile drawer -->
+  <div id="mob-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="closeMob()"></div>
+  <div id="mob-drawer" class="fixed top-0 right-0 h-full w-72 bg-surface z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-outline-variant">
+      <span class="text-headline-md font-bold text-primary">AbituriUm</span>
+      <button onclick="closeMob()" class="p-1 text-on-surface-variant material-symbols-outlined">close</button>
+    </div>
+    <div class="flex flex-col gap-1 p-4 flex-grow">
+      <a href="index.html"   class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">home</span>Главная</a>
+      <a href="planner.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">map</span>Планировщик</a>
+      <a href="ai-chat.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-container/10 text-primary font-bold text-body-sm"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">smart_toy</span>Наставник</a>
+      <a href="code.html"    class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">calculate</span>Калькулятор</a>
+      <a href="news.html"    class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">newspaper</span>Новости</a>
+      <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container text-body-sm"><span class="material-symbols-outlined">person</span>Кабинет</a>
+    </div>
+    <div class="p-4 border-t border-outline-variant">
+      <a href="planner.html" class="block text-center bg-secondary-container text-white px-6 py-3 rounded-lg font-bold hover:brightness-95">Начать путь</a>
+    </div>
   </div>
+
+  <!-- Chat area -->
+  <div class="flex-1 overflow-hidden flex flex-col md:p-6 pb-20 md:pb-6 gap-stack-lg">
+    <div class="flex-1 bg-surface-container-low md:rounded-xl flex flex-col shadow-sm border border-outline-variant/10 overflow-hidden">
+
+      <!-- Messages scroll -->
+      <div class="chat-container flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-stack-lg" id="chat-window">
+
+        <!-- Welcome block -->
+        <div class="flex flex-col items-center justify-center text-center py-8 mb-2">
+          <div class="w-24 h-24 mb-4 rounded-full overflow-hidden border-4 border-white shadow-lg pulse-secondary">
+            <img alt="Лис AbituriUm" src="fox.png" class="w-full h-full object-cover" style="mix-blend-mode:multiply"/>
+          </div>
+          <h2 class="text-headline-lg-mobile md:text-headline-lg text-primary mb-2">Привет, абитуриент!</h2>
+          <p class="text-body-lg text-on-surface-variant max-w-md">Я твой персональный гид в мире поступления. Спрашивай о чём угодно!</p>
+        </div>
+
+        <!-- Greeting message from AI -->
+        <div class="flex gap-stack-md max-w-[85%] md:max-w-[70%]" id="greeting-msg">
+          <div class="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-primary-container/20">
+            <img alt="Лис" src="fox.png" class="w-full h-full object-cover" style="mix-blend-mode:multiply"/>
+          </div>
+          <div class="flex flex-col gap-stack-sm">
+            <div class="bg-surface-container-highest text-on-surface p-4 rounded-xl rounded-tl-none shadow-sm ai-md">
+              <p>Чем могу помочь? Спроси про <strong>ЕГЭ</strong>, <strong>выбор вуза</strong>, <strong>дедлайны</strong> или апелляцию — отвечу подробно и по делу 🦊</p>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <button onclick="quickAsk('Какие вузы подходят для IT?')"
+                class="flex items-center gap-1 bg-surface-container-lowest border border-primary text-primary px-3 py-1.5 rounded-full hover:bg-primary-container/10 transition-colors text-label-bold active:scale-95 shadow-sm text-xs">
+                <span class="material-symbols-outlined text-[16px]">school</span>Вузы для IT
+              </button>
+              <button onclick="quickAsk('Расскажи о дедлайнах подачи документов в 2026')"
+                class="flex items-center gap-1 bg-surface-container-lowest border border-primary text-primary px-3 py-1.5 rounded-full hover:bg-primary-container/10 transition-colors text-label-bold active:scale-95 shadow-sm text-xs">
+                <span class="material-symbols-outlined text-[16px]">calendar_today</span>Дедлайны
+              </button>
+              <button onclick="quickAsk('Как правильно подать апелляцию по ЕГЭ?')"
+                class="flex items-center gap-1 bg-surface-container-lowest border border-secondary text-secondary px-3 py-1.5 rounded-full hover:bg-secondary-fixed/30 transition-colors text-label-bold active:scale-95 shadow-sm text-xs">
+                <span class="material-symbols-outlined text-[16px]">gavel</span>Апелляция
+              </button>
+            </div>
+            <span class="text-label-bold text-outline ml-2" id="greeting-time"></span>
+          </div>
+        </div>
+
+      </div><!-- /chat-window -->
+
+      <!-- Input footer -->
+      <div class="p-4 md:p-5 border-t border-outline-variant/20 bg-surface-container-lowest flex-shrink-0">
+        <div class="flex gap-stack-md items-end max-w-4xl mx-auto">
+          <div class="flex-1 relative">
+            <textarea id="chat-input" rows="1" maxlength="800"
+              placeholder="Напишите сообщение..."
+              class="w-full bg-surface-container-low border-none rounded-2xl px-5 py-3 pr-14 text-body-lg focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface resize-none"></textarea>
+            <button id="send-btn" onclick="sendMessage()"
+              class="absolute right-2 bottom-2 w-10 h-10 bg-secondary-container text-white rounded-xl flex items-center justify-center hover:brightness-110 active:scale-90 transition-all">
+              <span class="material-symbols-outlined">send</span>
+            </button>
+          </div>
+        </div>
+        <p class="text-center text-[11px] text-on-surface-variant mt-2 opacity-60">Enter — отправить · Shift+Enter — новая строка</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full z-30 flex justify-around items-center h-16 bg-surface/95 backdrop-blur-md shadow-lg border-t border-outline-variant/20">
+    <a href="index.html"   class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">home</span>Главная</a>
+    <a href="planner.html" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">map</span>Маршрут</a>
+    <a href="ai-chat.html" class="flex flex-col items-center justify-center bg-secondary-container text-white rounded-full px-4 py-1 text-[10px]">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">smart_toy</span>Лис
+    </a>
+    <a href="code.html"    class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">calculate</span>Баллы</a>
+    <a href="profile.html" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-[10px]"><span class="material-symbols-outlined">person</span>Кабинет</a>
+  </nav>
+
 </main>
 
-<!-- ── Footer ──────────────────────────────────────────────── -->
-<footer class="site-footer">
-  <div class="footer-inner">
-    <div>
-      <div class="footer-logo">АбитуриУм</div>
-      <p class="footer-copy">© 2026 АбитуриУм. Высокие академические результаты.</p>
-    </div>
-    <nav class="footer-links">
-      <a href="#">Политика конфиденциальности</a>
-      <a href="#">Условия использования</a>
-      <a href="#">Поддержка</a>
-      <a href="#">Партнёры-вузы</a>
-    </nav>
-  </div>
-</footer>
+<!-- ═══════════════════════════ SCRIPTS ════════════════════════════ -->
+<script>
+/* ── Profile context ──────────────────────────────────────── */
+function profileContext() {
+  try {
+    const p = JSON.parse(localStorage.getItem('plannerProfile') || localStorage.getItem('abituriumProfile') || '{}');
+    if (!p.name && !p.city) return '';
+    const parts = [];
+    if (p.name)      parts.push('Имя: ' + p.name);
+    if (p.city)      parts.push('Желаемый город: ' + p.city);
+    if (p.specialty) parts.push('Направление: ' + p.specialty);
+    if (p.score)     parts.push('Планируемые баллы: ' + p.score);
+    if (p.budget)    parts.push('Форма обучения: ' + p.budget);
+    return '\n\n---\nДАННЫЕ ПОЛЬЗОВАТЕЛЯ:\n' + parts.join('\n');
+  } catch { return ''; }
+}
 
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="script.js"></script>
+/* ── System prompt ────────────────────────────────────────── */
+const SYSTEM_PROMPT = `Ты — «АбитуриУм», персональный наставник по поступлению в российские вузы 2026.
+Отвечай СТРОГО в Markdown: ### для разделов, ** для ключевых слов, таблицы для сравнений, списки для перечислений.
+Ты эксперт по ЕГЭ, ОГЭ, проходным баллам, олимпиадам, апелляциям. Стиль: дружелюбный, чёткий, с эмодзи там где уместно.`;
+
+/* ── Conversation history ─────────────────────────────────── */
+const history = [];
+const MAX_HIST = 10;
+let busy = false;
+let rateLimited = false;
+
+/* ── Helpers ──────────────────────────────────────────────── */
+function nowTime() {
+  return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function renderMd(text) {
+  return DOMPurify.sanitize(marked.parse(text));
+}
+function scrollBottom() {
+  const w = document.getElementById('chat-window');
+  w.scrollTo({top: w.scrollHeight, behavior:'smooth'});
+}
+
+/* ── Append messages ──────────────────────────────────────── */
+function appendUser(text) {
+  const t = nowTime();
+  const div = document.createElement('div');
+  div.className = 'flex gap-stack-md flex-row-reverse max-w-[85%] md:max-w-[70%] self-end';
+  div.innerHTML = `
+    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-white">
+      <span class="material-symbols-outlined">person</span>
+    </div>
+    <div class="flex flex-col gap-stack-sm items-end">
+      <div class="bg-primary text-on-primary p-4 rounded-xl rounded-tr-none shadow-sm text-body-lg">${escHtml(text)}</div>
+      <span class="text-label-bold text-outline mr-2">${t}</span>
+    </div>`;
+  document.getElementById('chat-window').appendChild(div);
+  scrollBottom();
+}
+
+function appendAI(html) {
+  const t = nowTime();
+  const div = document.createElement('div');
+  div.className = 'flex gap-stack-md max-w-[85%] md:max-w-[70%]';
+  div.innerHTML = `
+    <div class="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-primary-container/20">
+      <img src="fox.png" alt="Лис" class="w-full h-full object-cover" style="mix-blend-mode:multiply"/>
+    </div>
+    <div class="flex flex-col gap-stack-sm">
+      <div class="bg-surface-container-highest text-on-surface p-4 rounded-xl rounded-tl-none shadow-sm ai-md">${html}</div>
+      <span class="text-label-bold text-outline ml-2">${t}</span>
+    </div>`;
+  document.getElementById('chat-window').appendChild(div);
+  scrollBottom();
+  return div;
+}
+
+function showLoading() {
+  const div = document.createElement('div');
+  div.id = 'loading-bubble';
+  div.className = 'flex gap-stack-md max-w-[85%] md:max-w-[70%]';
+  div.innerHTML = `
+    <div class="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-primary-container/20">
+      <img src="fox.png" alt="Лис" class="w-full h-full object-cover" style="mix-blend-mode:multiply"/>
+    </div>
+    <div class="bg-surface-container-highest p-4 rounded-xl rounded-tl-none shadow-sm" style="min-width:60px">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>`;
+  document.getElementById('chat-window').appendChild(div);
+  scrollBottom();
+}
+function removeLoading() {
+  const el = document.getElementById('loading-bubble');
+  if (el) el.remove();
+}
+
+/* ── Send to API ──────────────────────────────────────────── */
+async function callAI(userText) {
+  // Tavily search for context
+  let context = '';
+  try {
+    const sr = await fetch('https://api.tavily.com/search', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        api_key:'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',
+        query: userText + ' поступление вуз Россия 2026',
+        search_depth:'advanced', max_results:4
+      })
+    });
+    if (sr.ok) {
+      const sd = await sr.json();
+      context = sd.results?.map(r=>r.content).filter(Boolean).join('\n\n') || '';
+    }
+  } catch(_) {}
+
+  const systemPrompt = SYSTEM_PROMPT + profileContext() +
+    (context ? '\n\n---\nАКТУАЛЬНЫЙ КОНТЕКСТ:\n' + context : '');
+
+  history.push({role:'user', content:userText});
+  if (history.length > MAX_HIST * 2) history.splice(0, 2);
+
+  const res = await fetch('/api/chat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({systemPrompt, messages: history})
+  });
+
+  if (res.status === 429) {
+    history.pop();
+    const e = await res.json().catch(()=>({}));
+    const err = new Error('rate_limit');
+    err.retryAfter = e.retryAfter || 30;
+    throw err;
+  }
+  if (!res.ok) {
+    history.pop();
+    const e = await res.json().catch(()=>({}));
+    throw new Error(e.error || `Ошибка ${res.status}`);
+  }
+  const data = await res.json();
+  if (data.error) { history.pop(); throw new Error(data.error); }
+  history.push({role:'assistant', content:data.reply});
+  return data.reply;
+}
+
+/* ── Main send handler ────────────────────────────────────── */
+async function sendMessage() {
+  if (busy || rateLimited) return;
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  appendUser(text);
+  busy = true;
+  document.getElementById('send-btn').disabled = true;
+  showLoading();
+
+  try {
+    const reply = await callAI(text);
+    removeLoading();
+    appendAI(renderMd(reply));
+  } catch(e) {
+    removeLoading();
+    if (e.message === 'rate_limit') {
+      rateLimited = true;
+      startCountdown(e.retryAfter || 30);
+    } else {
+      appendAI(`<strong>Ошибка:</strong> ${escHtml(e.message)}`);
+    }
+  } finally {
+    busy = false;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('chat-input').focus();
+  }
+}
+
+function quickAsk(text) {
+  document.getElementById('chat-input').value = text;
+  sendMessage();
+}
+
+/* ── Rate limit countdown ─────────────────────────────────── */
+function startCountdown(seconds) {
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('chat-input').disabled = true;
+  let rem = seconds;
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'flex gap-stack-md max-w-[85%] md:max-w-[70%]';
+  msgDiv.innerHTML = `
+    <div class="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-primary-container/20">
+      <img src="fox.png" alt="Лис" class="w-full h-full object-cover" style="mix-blend-mode:multiply"/>
+    </div>
+    <div id="countdown-bubble" class="bg-surface-container-highest text-on-surface p-4 rounded-xl rounded-tl-none shadow-sm text-body-sm"></div>`;
+  document.getElementById('chat-window').appendChild(msgDiv);
+  const bubble = document.getElementById('countdown-bubble');
+  const update = () => { bubble.innerHTML = `⏳ Слишком много запросов. Повтор через <strong>${rem}</strong> сек.`; };
+  update();
+  scrollBottom();
+  const timer = setInterval(() => {
+    rem--;
+    if (rem <= 0) {
+      clearInterval(timer);
+      bubble.innerHTML = '✅ Готов! Можешь задавать следующий вопрос.';
+      rateLimited = false;
+      document.getElementById('send-btn').disabled = false;
+      document.getElementById('chat-input').disabled = false;
+      document.getElementById('chat-input').focus();
+    } else { update(); }
+  }, 1000);
+}
+
+/* ── Event listeners ──────────────────────────────────────── */
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+/* ── Mobile drawer ────────────────────────────────────────── */
+const mobBtn    = document.getElementById('mob-btn');
+const mobDrawer = document.getElementById('mob-drawer');
+const mobOverlay= document.getElementById('mob-overlay');
+const mobIcon   = document.getElementById('mob-icon');
+function openMob()  { mobDrawer.classList.remove('translate-x-full'); mobOverlay.classList.remove('hidden'); mobIcon.textContent='close'; document.body.style.overflow='hidden'; }
+function closeMob() { mobDrawer.classList.add('translate-x-full');    mobOverlay.classList.add('hidden');    mobIcon.textContent='menu';  document.body.style.overflow=''; }
+mobBtn.addEventListener('click', () => mobDrawer.classList.contains('translate-x-full') ? openMob() : closeMob());
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeMob(); });
+
+/* ── Init ─────────────────────────────────────────────────── */
+document.getElementById('greeting-time').textContent = nowTime();
+scrollBottom();
+</script>
 </body>
 </html>
